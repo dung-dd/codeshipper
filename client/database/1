@@ -1,0 +1,10 @@
+
+usage: cvt [-v|--verbose] [-r|--reduced] X Y [refresh]
+
+ -v|--verbose : Warn about CVT standard adherance.
+ -r|--reduced : Create a mode with reduced blanking (default: normal blanking).
+            X : Desired horizontal resolution (multiple of 8, required).
+            Y : Desired vertical resolution (required).
+      refresh : Desired refresh rate (default: 60.0Hz).
+
+Calculates VESA CVT (Coordinated Video Timing) modelines for use with X.

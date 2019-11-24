@@ -1,0 +1,209 @@
+{% load static %}
+
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
+    <title>Tạo mới Project</title>
+
+    <link href="{% static 'bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'style.css' %}" rel="stylesheet">
+    <link href="{% static 'animate.css' %}" rel="stylesheet">
+
+    <style >
+        [role="alert"] .progress {
+            margin-bottom: 0px !important;
+            position: absolute;
+            bottom: 0px;
+            left: 0px;
+            width: 100%;
+            height: 5px;
+        }
+    </style>
+
+    <script type="text/javascript" src="{% static 'jquery-3.4.1.min.js' %}"></script>
+    <script type="text/javascript">
+        function random_string(length) {
+            var result           = '';
+            var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            var charactersLength = characters.length;
+            for ( var i = 0; i < length; i++ ) {
+                result += characters.charAt(Math.floor(Math.random() * charactersLength));
+            }
+            return result;
+        }
+        function send_create(notify){
+            let url = window.location.origin + window.location.pathname + "/../create_new_project";
+            let name = $("#project-name").val();
+            let code = $("#project-code").val();
+            let server = $("#project-server").val();
+            let type = $("#project-type").val();
+            let config_service = $("#project-config-service").val();
+            let variables = $("#project-config-variables").val();
+            let script_deploy = $("#project-script-deploy").val();
+            let note = $("#project-note").val();
+
+            $.ajax({
+                url,
+                type: "POST",
+                headers: { "Content-Type": "application/json" },
+                dataType: "json",
+                data: JSON.stringify({
+                    name, code, server, type, config_service, variables, script_deploy, note
+                }),
+                success: function(res){
+                    console.log("on success", res);
+                    notify.close();
+
+                    let title = "Tạo mới thất bại";
+                    let type  = "danger";
+                    if (res.state){
+                        type = "success";
+                        title = "Tạo mới thành công"
+                    }
+                    else{ title = res.message; }
+                    $.notify({
+                        title, message: ""
+                    }, {
+                        type,
+                        delay: 5000,
+                        mouse_over: "pause",
+                    });
+                },
+                error: function(err){
+                    console.log("on error", err);
+                    notify.close();
+                    $.notify({
+                       title: "Tạo mới thất bại<br/>",
+                       message: err.toString() || "",
+                    },{
+                       type: "danger",
+                       delay: 10000,
+                       mouse_over: "pause",
+
+                       onClosed: function(){
+                           // enabled(["server-address", "server-secret", "server-secret", "btn-test-connection"]);
+                       }
+                   });
+
+                }
+            })
+        }
+        $(document).ready(()=>{
+            $("#project-code").val(random_string(10));
+            $("#remake-project-code").on("click", ()=>{
+                $("#project-code").val(random_string(10));
+            });
+
+            $("#btn-create").on("click", ()=>{
+
+                let notify = $.notify({
+                    title: "Đang tạo ...",
+                    message: ""
+                },{
+                    type: "info",
+                    delay: 60000,
+                    showProgressbar: true,
+                    mouse_over: "pause",
+
+                    onClosed: function(){
+                        // enabled(["server-address", "server-secret", "server-secret", "btn-test-connection"]);
+                    }
+                });
+                send_create(notify);
+            })
+        });
+    </script>
+
+</head>
+
+<body class="app">
+    {% include "templates/loader.html" %}
+    <div>
+        {% include "templates/left_menu.html" %}
+        <div class="page-container">
+            {% include "templates/header.html" %}
+            <main class="main-content bgc-grey-100">
+                <div id="mainContent">
+                    <div class="masonry-">
+                        <div class="bgc-white p-20 bd">
+                            <!-- <h6 class="c-grey-900">Tạo mới Server</h6> -->
+                            <div class="mT-30">
+                                <div class="form-group">
+                                    <label for="project-name">Name *</label>
+                                    <input class="form-control" id="project-name" placeholder="Project Name">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="project-code">Code *</label>
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <input class="form-control" id="project-code" placeholder="Project Code">
+                                        </div>
+                                        <div class="col-md-4" style="display: flex; align-items: center;">
+                                            <a class="sidebar-link" href="javascript:void(0)" id="remake-project-code">
+                                                <span class="icon-holder"><i class="ti-reload"></i> </span>
+                                                <span class="title">Tạo lại Project Code</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <small class="form-text text-muted">Gồm 10 ký tự alpha-numberic.</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="project-server">Server *</label>
+                                    <input class="form-control" id="project-server" placeholder="Server Deploy">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="project-type">Type *</label>
+                                    <input class="form-control" id="project-type" placeholder="Project Type">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="project-config-service">Config *</label>
+                                    <textarea class="form-control" id="project-config-service" placeholder="Project Config"></textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="project-config-variables">Variables</label>
+                                    <textarea class="form-control" id="project-config-variables" placeholder="Project Variables"></textarea>
+                                    <small class="form-text text-muted">Variables name CONFIG_PATH, SOURCE_PATH.</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="project-script-deploy">Script</label>
+                                    <textarea class="form-control" id="project-script-deploy" placeholder="Script Config"></textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="server-note">Ghi chú</label>
+                                    <textarea class="form-control" id="project-note" placeholder="Ghi chú"></textarea>
+                                </div>
+
+                                <div class="d-flex" style="justify-content: center">
+                                    <!-- <button id="btn-test-connection" class="btn btn-light" style="color: #333; border: 1px solid #999; border-radius: 5px">Test Connection</button>
+                                    <span class="" style="width: 10px"></span> -->
+                                    <button id="btn-create" class="btn btn-primary">Tạo</button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+
+            {% include "templates/footer.html" %}
+
+        </div>
+    </div>
+    <script type="text/javascript" src="{% static 'vendor.js' %}"></script>
+    <script type="text/javascript" src="{% static 'bundle.js' %}"></script>
+    <script type="text/javascript" src="{% static 'bootstrap.bundle.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'bootstrap-notify.min.js' %}"></script>
+</body>
+
+</html>
