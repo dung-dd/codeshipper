@@ -1,0 +1,263 @@
+{% load static %}
+
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
+    <title>Tạo mới Project Type</title>
+
+    <link href="{% static 'bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'style.css' %}" rel="stylesheet">
+    <link href="{% static 'animate.css' %}" rel="stylesheet">
+<!-- <style type="text/css">
+    @font-face{
+        font-family:tk-droid-sans-mono-n4;
+        src:url({% static "fonts/tk-droid-sans-mono-n4/l_400.woff2" %}) format("woff2"),url({% static "fonts/tk-droid-sans-mono-n4/d_400.woff" %}) format("woff"),url({% static "fonts/tk-droid-sans-mono-n4/a_400.otf" %}) format("opentype");
+        font-weight:400;
+        font-style:normal;
+    }
+    @font-face{
+        font-family:tk-museo-sans-rounded-n3;
+        src:url({% static "fonts/tk-museo-sans-rounded-n3/l_300.woff2" %}) format("woff2"),url({% static "fonts/tk-museo-sans-rounded-n3/d_300.woff" %}) format("woff"),url({% static "fonts/tk-museo-sans-rounded-n3/a_300.otf" %}) format("opentype");
+        font-weight:300;
+        font-style:normal;
+    }
+    @font-face{
+        font-family:tk-museo-sans-rounded-n7;
+        src:url({% static "fonts/tk-museo-sans-rounded-n7/l_700.woff2" %}) format("woff2"),url({% static "fonts/tk-museo-sans-rounded-n7/d_700.woff" %}) format("woff"),url({% static "fonts/tk-museo-sans-rounded-n7/a_300.otf" %}) format("opentype");
+        font-weight:700;
+        font-style:normal;
+    }
+    @font-face{
+        font-family:tk-museo-sans-rounded-n5;
+        src:url({% static "fonts/tk-museo-sans-rounded-n5/l_500.woff2" %}) format("woff2"),url({% static "fonts/tk-museo-sans-rounded-n5/d_500.woff2" %}) format("woff"),url({% static "fonts/tk-museo-sans-rounded-n5/a_500.otf" %}) format("opentype");
+        font-weight:500;
+        font-style:normal;
+    }
+</style> -->
+    <style type="text/css">
+        [role="alert"] .progress {
+            margin-bottom: 0px !important;
+            position: absolute;
+            bottom: 0px;
+            left: 0px;
+            width: 100%;
+            height: 5px;
+        }
+
+        .textarea {
+            background-color: #0F1A28 !important;
+            color: white !important;
+            font-family: monospace !important;
+            line-height: 1.4em !important;
+            min-height: 15em !important;
+        }
+
+        .btn-action {
+            min-width: 200px !important;
+            padding: 10px !important;
+            font-size: 20px !important;
+        }
+    </style>
+
+    <script type="text/javascript" src="{% static 'jquery-3.4.1.min.js' %}"></script>
+    {{ cs_data | json_script:"cs_data" }}
+    <script type="text/javascript">
+    notify_template = '<div data-notify="container" class="col-xs-11 col-sm-3 alert alert-{0}" role="alert">' +
+        '<button type="button" aria-hidden="true" class="close" data-notify="dismiss">×</button>' +
+        '<span data-notify="icon"></span> ' +
+        '<span data-notify="title">{1}</span> ' +
+        '<div data-notify="message">{2}</div>' +
+        '<div class="progress" data-notify="progressbar">' +
+            '<div class="progress-bar progress-bar-{0}" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>' +
+        '</div>' +
+        '<a href="{3}" target="{4}" data-notify="url"></a>' +
+    '</div>';
+        
+        function reset_data(){
+            $("#name").val(cs_data["item"]["name"]);
+            $("#configuration").val(cs_data["item"]["configuration"]);
+            $("#script").val(cs_data["item"]["script"]);
+        }
+        $(document).ready(()=>{
+            cs_data = JSON.parse($("#cs_data").text())
+            $("#btn-delete").on("click", ()=>{
+                $("#modal-confirm-delete").modal();
+            });
+
+            $("#btn-cancel-edit").on("click", ()=>{
+                $("#btn-edit").toggle();
+                $("#btn-save").toggle();
+                $("#btn-cancel-edit").toggle();
+                $("#btn-delete").toggle();
+
+                $('[data-type="field"]').attr("disabled", true);
+                reset_data()
+            });
+
+            $("#btn-edit").on("click", ()=>{
+                $('[data-type="field"]').removeAttr("disabled").css({height: "auto"});
+
+                $("#btn-edit").toggle();
+                $("#btn-save").toggle();
+                $("#btn-cancel-edit").toggle();
+                $("#btn-delete").toggle();
+            });
+
+            $("#btn-save").on("click", ()=>{
+                let id = cs_data["item"]["id"];
+                let name = $("#name").val().trim();
+                let configuration = $("#configuration").val().trim();
+                let script = $("#script").val().trim();
+
+                let url = window.location.origin + (window.location.pathname + "/../update").replace("//", "/");
+
+                $.ajax({
+                    url,
+                    type: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    dataType: "json",
+                    data: JSON.stringify({
+                        id, name, configuration, script,
+                    }),
+                    timeout: 6000,
+                    success: (res)=>{
+                        if (res && res["state"]){
+                            // $("#btn-cancel-edit").click();
+                            $.notify({
+                                title: "Cập nhật thành công\n",
+                                message: ""
+                            },{
+                                type: "success",
+                                delay: 6000,
+                                showProgressbar: false,
+                                mouse_over: "pause",
+                                template: notify_template,
+                                onClosed: function(){
+
+                                }
+                            });
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1111 );
+                        }
+                        if (res && !res["state"]){
+                            $.notify({
+                                title: "Cập nhật thất bại\n",
+                                message: res["message"] || ""
+                            },{
+                                type: "danger",
+                                delay: 6000,
+                                showProgressbar: false,
+                                mouse_over: "pause",
+                                template: notify_template,
+                                onClosed: function(){
+
+                                }
+                            });
+                        }
+                    },
+                    error: (err)=>{
+                        console.log("err", err);
+                        $.notify({
+                            title: "Cập nhật thất bại",
+                            message: ""
+                        },{
+                            type: "danger",
+                            delay: 6000,
+                            showProgressbar: false,
+                            mouse_over: "pause",
+                            template: notify_template,
+                            onClosed: function(){
+
+                            }
+                        });
+                    }
+                })
+            });
+
+        });
+    </script>
+
+</head>
+
+<body class="app is-collapsed">
+    {% include "templates/loader.html" %}
+
+<!-- Modal -->
+<div class="modal fade" id="modal-confirm-delete" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Xóa?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Bạn có muốn xóa?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Đóng</button>
+                <button id="btn-confirm-delete" type="button" class="btn btn-secondary" data-dismiss="modal">Xóa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <div>
+        {% include "templates/left_menu.html" %}
+        <div class="page-container">
+            {% include "templates/header.html" %}
+            <main class="main-content bgc-grey-100">
+                <div id="mainContent">
+                    <div class="masonry-">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <button id="btn-edit" class="btn btn-primary">Sửa</button>
+                                <button id="btn-save" class="btn btn-success" style="display: none">Lưu</button>
+                                <span>&nbsp;</span>
+                                <button id="btn-delete" class="btn btn-link" >Xóa</button>
+                                <button id="btn-cancel-edit" class="btn btn-link" style="display: none;" >Hủy</button>
+                            </div>
+                        </div>
+                        <div class="" style="margin-top: 10px"></div>
+
+                        <div class="bgc-white p-20 bd">
+                            <!-- <h6 class="c-grey-900">Tạo mới Server</h6> -->
+                            <div class="mT-30">
+                                <div class="form-group">
+                                    <label for="name">Name *</label>
+                                    <input disabled data-type="field" class="form-control" id="name" placeholder="Project Type Name" value="{{item.name}}">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="configuration">Sample Configuration</label>
+                                    <textarea disabled data-type="field" class="form-control textarea" id="configuration">{{ item.configuration }}</textarea >
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="script">Bash Script</label>
+                                    <textarea disabled data-type="field" class="form-control textarea" id="script">{{ item.script }}</textarea>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+
+            {% include "templates/footer.html" %}
+
+        </div>
+    </div>
+    <script type="text/javascript" src="{% static 'vendor.js' %}"></script>
+    <script type="text/javascript" src="{% static 'bundle.js' %}"></script>
+    <script type="text/javascript" src="{% static 'bootstrap.bundle.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'bootstrap-notify.min.js' %}"></script>
+</body>
+
+</html>

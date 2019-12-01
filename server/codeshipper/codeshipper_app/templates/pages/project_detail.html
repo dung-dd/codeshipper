@@ -1,0 +1,443 @@
+{% load static %}
+
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
+	<title>Chi tiết Project</title>
+
+	<link href="{% static 'bootstrap.min.css' %}" rel="stylesheet">
+	<link href="{% static 'style.css' %}" rel="stylesheet">
+	<link href="{% static 'animate.css' %}" rel="stylesheet">
+
+	<style >
+		[role="alert"] .progress {
+			margin-bottom: 0px !important;
+			position: absolute;
+			bottom: 0px;
+			left: 0px;
+			width: 100%;
+			height: 5px;
+		}
+		.textarea {
+			background-color: #0F1A28 !important;
+			color: white !important;
+			font-family: monospace !important;
+			line-height: 1.4em !important;
+			min-height: 15em !important;
+		}
+		.btn-action {
+			min-width: 200px !important;
+			padding: 10px !important;
+			font-size: 16px !important;
+		}
+		.form-control{
+			min-height: 35px;
+		}
+	</style>
+
+	<script type="text/javascript" src="{% static 'jquery-3.4.1.min.js' %}"></script>
+	{{ cs_data | json_script:"cs_data" }}
+	<script type="text/javascript">
+notify_template = '<div data-notify="container" class="col-xs-11 col-sm-3 alert alert-{0}" role="alert">' +
+	'<button type="button" aria-hidden="true" class="close" data-notify="dismiss">×</button>' +
+	'<span data-notify="icon"></span> ' +
+	'<span data-notify="title">{1}</span> ' +
+	'<div data-notify="message">{2}</div>' +
+	'<div class="progress" data-notify="progressbar">' +
+		'<div class="progress-bar progress-bar-{0}" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>' +
+	'</div>' +
+	'<a href="{3}" target="{4}" data-notify="url"></a>' +
+'</div>'
+		function random_string(length) {
+			var result           = '';
+			var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+			var charactersLength = characters.length;
+			for ( var i = 0; i < length; i++ ) {
+				result += characters.charAt(Math.floor(Math.random() * charactersLength));
+			}
+			return result;
+		}
+
+		function onchange_project_type(event){
+			var value = $(event.target).val();
+			var url = window.location.origin + (window.location.pathname + "/../get_config_project_type").replace("//", "/");
+			console.log(url, value);
+			$.ajax({
+				url,
+				type: "POST",
+				dataType: "json",
+				headers: { "Content-Type": "application/json" },
+				data: JSON.stringify({id: value}),
+				success: (res)=>{
+					if (!res["state"]) return ;
+					let data = res["data"];
+
+					if (data && data["configuration"]){
+						$("#project-config-service").val(data["configuration"]);
+					}
+					if (data && data["script"]){
+						$("#project-script-deploy").val(data["script"]);
+					}
+
+				},
+				error: (err)=>{
+					console.log("err on change project type", err);
+				}
+
+			})
+		};
+		function reset_data(){
+			let item = cs_data["item"];
+			$("#project-name").val(item.name);
+			$("#project-code").val(item.code);
+			$("#project-server").val(item.server);
+			$("#project-type").val(item.type);
+			$("#project-config-path").val(item.config_path);
+			$("#project-config-service").val(item.config_service);
+			$("#project-script-deploy").val(item.script_deploy);
+			$("#project-note").val(item.note);
+			$('[data-type="field"]').attr("disabled", true);
+		}
+		
+		function send_update(notify){
+			let url = window.location.origin + (window.location.pathname + "/../update").replace("//", "/");
+			let id = $("#item_id").val().trim();
+			let name = $("#project-name").val().trim();
+			let code = $("#project-code").val().trim();
+			let server = $("#project-server").val().trim();
+			let type = $("#project-type").val().trim();
+			let config_path = $("#project-config-path").val().trim();
+			let config_service = $("#project-config-service").val().trim();
+			let script_deploy = $("#project-script-deploy").val().trim();
+			let note = $("#project-note").val().trim();
+
+			let body = {
+				id, name, code, server, type, config_path, config_service, script_deploy, note
+			};
+			console.log("body", body);
+			$.ajax({
+				url,
+				type: "POST",
+				headers: { "Content-Type": "application/json" },
+				dataType: "json",
+				data: JSON.stringify(body),
+				success: function(res){
+					notify.close();
+
+					let title = "Cập nhật thất bại";
+					let type  = "danger";
+					if (res.state){
+						type = "success";
+						title = "Cập nhật thành công";
+					}
+					else{ title = res.message; }
+					$.notify({
+						title, message: ""
+					}, {
+						type,
+						delay: 5000,
+						mouse_over: "pause",
+					});
+				},
+				error: function(err){
+					console.log("error update", err);
+					notify.close();
+					$.notify({
+					   title: "Cập nhật thất bại<br/>",
+					   message: "",
+					},{
+					   type: "danger",
+					   delay: 10000,
+					   mouse_over: "pause",
+
+					   onClosed: function(){
+					   }
+				   });
+
+				}
+			})
+		}
+		$(document).ready(()=>{
+			cs_data = JSON.parse($("#cs_data").text());
+			// $("#project-code").val(random_string(10));
+			$("#remake-project-code").on("click", ()=>{
+				$("#project-code").val(random_string(10));
+			});
+
+			$("#btn-edit").on("click", ()=>{
+				$('[data-type="field"]').removeAttr("disabled");
+				$(".form-control").css({height: "auto"});
+				
+				$("#btn-edit").toggle();
+				$("#btn-save").toggle();
+				$("#btn-cancel-edit").toggle();
+				$("#btn-delete").toggle();
+				// fill_data();
+			});
+			$("#btn-cancel-edit").on("click", ()=>{
+				$("#btn-edit").toggle();
+				$("#btn-save").toggle();
+				$("#btn-cancel-edit").toggle();
+				$("#btn-delete").toggle();
+				
+                reset_data()
+			});
+            $("#btn-save").on("click", ()=>{
+                let notify = $.notify({
+                    title: "Đang cập nhật",
+                    message: "",
+                },{
+                    type: "info",
+                    delay: 10000,
+                    mouse_over: "pause",
+
+                    onClosed: function(){
+                    }
+                });
+                send_update(notify);
+            });
+
+			$("#btn-delete").on("click", ()=>{
+				$("#modal-confirm-delete").modal();
+			});
+			$("#btn-confirm-delete").on("click", ()=>{
+				let url = window.location.origin + (window.location.pathname + "/../delete").replace("//", "/");
+				let return_url = window.location.origin + (window.location.pathname + "/../").replace("//", "/");
+				let id = $("#item_id").val();
+				
+				$.ajax({
+					url,
+					type: "POST",
+					headers: { "Content-Type": "application/json" },
+					dataType: "json",
+					data: JSON.stringify({
+						id: id
+					}),
+					timeout: 60000,
+					success: (res)=>{
+						console.log("res", res);
+						if (res && res["state"]){
+							window.open(return_url, "_self");
+						}
+						if (res && !res["state"]){
+							$.notify({
+								title: "Xóa thất bại\n",
+								message: res["message"]
+							},{
+								type: "danger",
+								delay: 6000,
+								showProgressbar: false,
+								mouse_over: "pause",
+								template: notify_template,
+								onClosed: function(){
+
+								}
+							});
+						}
+					},
+					error: (err)=>{
+						console.log("err", err);
+						$.notify({
+							title: "Xóa thất bại",
+							message: ""
+						},{
+							type: "danger",
+							delay: 6000,
+							showProgressbar: false,
+							mouse_over: "pause",
+							template: notify_template,
+							onClosed: function(){
+
+							}
+						});
+					}
+				});
+			});
+
+			$("#btn-create").on("click", ()=>{
+
+				let notify = $.notify({
+					title: "Đang tạo ...",
+					message: ""
+				},{
+					type: "info",
+					delay: 60000,
+					showProgressbar: true,
+					mouse_over: "pause",
+
+					onClosed: function(){
+						// enabled(["server-address", "server-secret", "server-secret", "btn-test-connection"]);
+					}
+				});
+				send_update(notify);
+			})
+		});
+	</script>
+
+</head>
+
+<body class="app is-collapsed">
+	{% include "templates/loader.html" %}
+
+<!-- Modal -->
+<div class="modal fade" id="modal-confirm-delete" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLongTitle">Xóa?</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				Bạn có muốn xóa?
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary" data-dismiss="modal">Đóng</button>
+				<button id="btn-confirm-delete" type="button" class="btn btn-secondary" data-dismiss="modal">Xóa</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+	<input id="item_id" hidden value="{{item.id}}" />
+	<div id="loading" class="d-none" style="position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 10;">
+		<div>
+		</div>
+	</div>
+
+	<div>
+		{% include "templates/left_menu.html" %}
+		<div class="page-container">
+			{% include "templates/header.html" %}
+			<main class="main-content bgc-grey-100">
+				<div id="mainContent">
+					<div class="masonry-">
+
+						<div class="row">
+							<div class="col-md-12">
+								<button id="btn-edit" class="btn btn-primary">Sửa</button>
+								<button id="btn-save" class="btn btn-success" style="display: none">Lưu</button>
+								<span>&nbsp;</span>
+								<button id="btn-delete" class="btn btn-link" >Xóa</button>
+								<button id="btn-cancel-edit" class="btn btn-link" style="display: none;" >Hủy</button>
+							</div>
+						</div>
+						<div class="" style="margin-top: 10px"></div>
+
+						<div class="bgc-white p-20 bd">
+							<!-- <h6 class="c-grey-900">Tạo mới Server</h6> -->
+							<div class="mT-30">
+								<div class="form-group" >
+									<label for="project-name">Tên dự án *</label>
+									<input disabled class="form-control" id="project-name" data-type="field" value="{{ item.name }}" >
+								</div>
+
+								<div class="form-group">
+									<label for="project-code">Mã dự án *</label>
+									<div class="row">
+										<div class="col-md-8">
+											<input disabled data-type="field" class="form-control" id="project-code" placeholder="Project Code" value="{{ item.code }}">
+										</div>
+										<div class="col-md-4" style="display: flex; align-items: center;">
+											<button disabled data-type="field" class="btn btn-link sidebar-link" href="javascript:void(0)" id="remake-project-code" >
+												<span class="icon-holder"><i class="ti-reload"></i> </span>
+												<span class="title">Tạo lại Mã dự án</span>
+											</button >
+										</div>
+									</div>
+									<small class="form-text text-muted">Gồm 10 ký tự chữ và số.</small>
+								</div>
+
+                                <div class="form-group">
+									<label for="server-note">Phiên bản hiện tại</label>
+									<div class="form-control">{{ item.version }}</div>
+								</div>
+
+								<div class="form-group">
+									<label for="project-server">Server *</label>
+									<select disabled data-type="field" class="form-control" id="project-server" value="{{item.server}}" >
+										<option class="form-control" value="">Server triển khai</option>
+										{% if server_list %}
+											{% for server in server_list %}
+												{% ifequal server.id item.server %}
+													<option class="form-control" selected value="{{ server.id }}" >{{ server.name }}</option>
+												{% endifequal %}
+												{% ifnotequal server.id item.server %}
+													<option class="form-control" value="{{ server.id }}" >{{ server.name }}</option>
+												{% endifnotequal %}
+												
+											{% endfor %}
+										{% endif %}
+									</select >
+								</div>
+
+								<div class="form-group" >
+									<label for="project-type">Loại hình dịch vụ</label>
+									<select disabled data-type="field" class="form-control" id="project-type" onchange="onchange_project_type(event)">
+										<option class="form-control" value="">Project Type</option disabled>
+										{% if project_type_list %}
+											{% for project_type in project_type_list %}
+												{% ifequal server.id item.type %}
+													<option value="{{ project_type.id }}" selected >{{ project_type.name }}</option>
+												{% endifequal %}
+												{% ifnotequal server.id item.type %}
+													<option value="{{ project_type.id }}" >{{ project_type.name }}</option>
+												{% endifnotequal %}
+	
+											{% endfor %}
+										{% endif %}
+									</select >
+								</div>
+
+								<div class="form-group">
+									<label for="project-config-path">Config path</label>
+									<input disabled data-type="field" class="form-control" id="project-config-path" value="{{ item.config_path }}">
+								</div>
+
+								<div class="form-group">
+									<label for="project-config-service">Config</label>
+									<textarea disabled data-type="field" class="form-control textarea" id="project-config-service" placeholder="Project Config">{{ item.config_service }}</textarea disabled>
+								</div>
+
+								<div class="form-group">
+									<label for="project-script-deploy">Bash Script</label>
+									<textarea disabled data-type="field" class="form-control textarea" id="project-script-deploy" placeholder="Bash Script">{{ item.script_deploy }}</textarea>
+								</div>
+
+								<div class="form-group">
+									<label for="server-note">Ghi chú</label>
+									<textarea disabled data-type="field" class="form-control" id="project-note" placeholder="Ghi chú">{{ item.note }}</textarea disabled>
+								</div>
+
+								<div class="form-group">
+									<label for="server-note">Thời gian cập nhật</label>
+									<div class="form-control">{{ item.updated_time }}</div
+								</div>
+
+								<div class="form-group">
+									<label for="server-note">Thời gian tạo</label>
+									<div class="form-control">{{ item.created_time }}</div>
+								</div>
+
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</main>
+
+			{% include "templates/footer.html" %}
+
+		</div>
+	</div>
+	<script type="text/javascript" src="{% static 'vendor.js' %}"></script>
+	<script type="text/javascript" src="{% static 'bundle.js' %}"></script>
+	<script type="text/javascript" src="{% static 'bootstrap.bundle.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'bootstrap-notify.min.js' %}"></script>
+</body>
+
+</html>

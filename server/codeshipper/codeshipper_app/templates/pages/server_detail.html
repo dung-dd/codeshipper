@@ -1,0 +1,418 @@
+{% load static %}
+
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
+    <title>Server</title>
+    <link href="{% static 'bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'style.css' %}" rel="stylesheet">
+    <link href="{% static 'animate.css' %}" rel="stylesheet">
+
+    <style >
+        [role="alert"] .progress {
+            margin-bottom: 0px !important;
+            position: absolute;
+            bottom: 0px;
+            left: 0px;
+            width: 100%;
+            height: 5px;
+        }
+    </style>
+    <script type="text/javascript" src="{% static 'jquery-3.4.1.min.js' %}"></script>
+    {{ cs_data | json_script:"cs_data" }}
+    
+    <script type="text/javascript">
+        notify_template = '<div data-notify="container" class="col-xs-11 col-sm-3 alert alert-{0}" role="alert">' +
+            '<button type="button" aria-hidden="true" class="close" data-notify="dismiss">×</button>' +
+            '<span data-notify="icon"></span> ' +
+            '<span data-notify="title">{1}</span> ' +
+            '<div data-notify="message">{2}</div>' +
+            '<div class="progress" data-notify="progressbar">' +
+                '<div class="progress-bar progress-bar-{0}" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>' +
+            '</div>' +
+            '<a href="{3}" target="{4}" data-notify="url"></a>' +
+        '</div>'
+        function disabled(ids){
+            if (typeof ids == "string"){ ids = [ids]; }
+            ids.forEach(id=>{
+                $("#"+id)?$("#"+id).attr("disabled", "true"):"";
+            });
+        }
+        function enabled(ids){
+            if (typeof ids == "string"){ ids = [ids]; }
+            ids.forEach(id=>{
+                $("#"+id)?$("#"+id).removeAttr("disabled"): "";
+            });
+        }
+        function reset_data(){
+            $("#server-address").text(cs_data["item"]["name"]);
+            $("#server-port").text(cs_data["item"]["port"]);
+            $("#server-secret").text(cs_data["item"]["secret"]);
+            $("#server-note").text(cs_data["item"]["note"]);
+        }
+        function send_test_connection(notify){
+            let url = window.location.origin + window.location.pathname + "/../../test_connection";
+
+            let name = $("#server-address").text().trim();
+            let port = $("#server-port").text().trim();
+            let secret = $("#server-secret").text().trim();
+            
+            $.ajax({
+                url,
+                type: "POST",
+                headers: { "Content-Type": "application/json" },
+                dataType: "json",
+                data: JSON.stringify({
+                    name, port, secret
+                }),
+                timeout: 60000,
+                success: (res)=>{
+                    notify.close();
+
+                    let type = "danger";
+                    let title = "Kết nối thất bại";
+                    if (res.state){
+                        type  = "success",
+                        title = "Kết nối thành công";
+                    }
+                    else{
+                        console.log("res", res);
+                        title = res.message || title ;
+                    }
+
+                    $.notify({
+                        title, message: ""
+                    }, {
+                        type,
+                        delay: 5000,
+                        mouse_over: "pause",
+                    });
+                },
+                error: (err)=>{
+                    console.log("on error", err, notify);
+                    notify.close();
+                    $.notify({
+                        title: "Kiểm tra thất bại",
+                        message: ""
+                    }, {
+                        type: "danger",
+                        delay: 5000,
+                        mouse_over: "pause",
+                    });
+                }
+            })
+        }
+
+        $(document).ready(()=>{
+            cs_data = JSON.parse($("#cs_data").text())
+            $("#btn-test-connection").on("click", ()=>{
+                disabled(["server-address", "server-secret", "server-secret", "btn-test-connection"]);
+
+                let notify = $.notify({
+                    title: "Đang kiểm tra kết nối",
+                    message: ""
+                },{
+                    type: "info",
+                    delay: 60000,
+                    showProgressbar: true,
+                    mouse_over: "pause",
+
+                    onClosed: function(){
+                    }
+                });
+
+                send_test_connection(notify);
+            });
+
+            $("#btn-confirm-delete").on("click", ()=>{
+                let url = window.location.origin + (window.location.pathname + "/../delete").replace("//", "/");
+                let return_url = window.location.origin + (window.location.pathname + "/../").replace("//", "/");
+                let id = $("#server_id").val();
+                
+                $.ajax({
+                    url,
+                    type: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    dataType: "json",
+                    data: JSON.stringify({
+                        id: id
+                    }),
+                    timeout: 60000,
+                    success: (res)=>{
+                        console.log("res", res);
+                        if (res && res["state"]){
+                            window.open(return_url, "_self");
+                        }
+                        if (res && !res["state"]){
+                            $.notify({
+                                title: "Xóa thất bại\n",
+                                message: res["message"]
+                            },{
+                                type: "danger",
+                                delay: 6000,
+                                showProgressbar: false,
+                                mouse_over: "pause",
+                                template: notify_template,
+                                onClosed: function(){
+
+                                }
+                            });
+                        }
+                    },
+                    error: (err)=>{
+                        console.log("err", err);
+                        $.notify({
+                            title: "Xóa thất bại",
+                            message: ""
+                        },{
+                            type: "danger",
+                            delay: 6000,
+                            showProgressbar: false,
+                            mouse_over: "pause",
+                            template: notify_template,
+                            onClosed: function(){
+
+                            }
+                        });
+                    }
+                });
+            });
+
+            $("#btn-delete").on("click", ()=>{
+                $("#modal-confirm-delete").modal();
+            });
+
+            $("#btn-cancel-edit").on("click", ()=>{
+                $("#btn-edit").toggle();
+                $("#btn-save").toggle();
+                $("#btn-cancel-edit").toggle();
+                $("#btn-delete").toggle();
+                let contenteditable = $('div[contenteditable="true"]');
+                contenteditable.prop("contenteditable", false);
+                reset_data()
+            });
+
+            $("#btn-edit").on("click", ()=>{
+                $('div[data-type="field"]').attr("contenteditable", true).css({height: "auto"});
+
+                $("#btn-edit").toggle();
+                $("#btn-save").toggle();
+                $("#btn-cancel-edit").toggle();
+                $("#btn-delete").toggle();
+            });
+
+            $("#btn-save").on("click", ()=>{
+                let id = cs_data["item"]["id"];
+                let name = $("#server-address").text().trim();
+                let port = $("#server-port").text().trim();
+                let secret = $("#server-secret").text().trim();
+                let note = $("#server-note").text().trim();
+
+                let url = window.location.origin + (window.location.pathname + "/../update_server").replace("//", "/");
+                console.log("url", url, {id: name, port, secret, note});
+                $.ajax({
+                    url,
+                    type: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    dataType: "json",
+                    data: JSON.stringify({
+                        id, name, port, secret, note
+                    }),
+                    timeout: 6000,
+                    success: (res)=>{
+                        console.log("res", res);
+                        if (res && res["state"]){
+                            $("#btn-cancel-edit").click();
+                            console.log("res update", res);
+                            $.notify({
+                                title: "Cập nhật thành công\n",
+                                message: ""
+                            },{
+                                type: "success",
+                                delay: 6000,
+                                showProgressbar: false,
+                                mouse_over: "pause",
+                                template: notify_template,
+                                onClosed: function(){
+
+                                }
+                            });
+                        }
+                        if (res && !res["state"]){
+                            $.notify({
+                                title: "Cập nhật thất bại\n",
+                                message: res["message"] || ""
+                            },{
+                                type: "danger",
+                                delay: 6000,
+                                showProgressbar: false,
+                                mouse_over: "pause",
+                                template: notify_template,
+                                onClosed: function(){
+
+                                }
+                            });
+                        }
+                    },
+                    error: (err)=>{
+                        console.log("err", err);
+                        $.notify({
+                            title: "Cập nhật thất bại",
+                            message: ""
+                        },{
+                            type: "danger",
+                            delay: 6000,
+                            showProgressbar: false,
+                            mouse_over: "pause",
+                            template: notify_template,
+                            onClosed: function(){
+
+                            }
+                        });
+                    }
+                })
+            });
+        })
+    </script>
+</head>
+
+<body class="app is-collapsed">
+    {% include "templates/loader.html" %}
+
+<!-- Modal -->
+<div class="modal fade" id="modal-confirm-delete" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Xóa?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Bạn có muốn xóa?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Đóng</button>
+                <button id="btn-confirm-delete" type="button" class="btn btn-secondary" data-dismiss="modal">Xóa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <input id="server_id" hidden value="{{item.id}}" />
+    <div id="loading" class="d-none" style="position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 10;">
+        <div>
+        </div>
+    </div>
+
+    <div>
+        {% include "templates/left_menu.html" %}
+        <div class="page-container">
+
+            {% include "templates/header.html" %}
+
+            <main class="main-content bgc-grey-100">
+                <div id="mainContent">
+                    <div class="masonry-">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <button id="btn-edit" class="btn btn-primary">Sửa</button>
+                                <button id="btn-save" class="btn btn-success" style="display: none">Lưu</button>
+                                <span>&nbsp;</span>
+                                <button id="btn-delete" class="btn btn-link" >Xóa</button>
+                                <button id="btn-cancel-edit" class="btn btn-link" style="display: none;" >Hủy</button>
+                            </div>
+                        </div>
+                        <div class="" style="margin-top: 10px"></div>
+
+                        <div class="bgc-white p-20 bd">
+                            
+                            <div class="mT-30">
+                                <div class="form-group">
+                                    <label for="server-address">Địa chỉ Server</label>
+                                    <div class="form-control" data-type="field" id="server-address" placeholder="Địa chỉ Server" >
+                                        {% if item %}
+                                            {{ item.name }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="server-port">Cổng</label>
+                                    <div class="form-control" data-type="field" id="server-port" placeholder="Cổng" >
+                                        {% if item %}
+                                            {{ item.port }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="server-secret">Mã bí mật</label>
+                                    <div class="form-control" data-type="field" id="server-secret" aria-describedby="emailHelp" >
+                                        {% if item %}
+                                            {{ item.secret }}
+                                        {% endif %}
+                                    </div>
+                                    <small class="form-text text-muted">Mã bí mật được cấu hình trên server.</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="server-note">Ghi chú</label>
+                                    <div class="form-control" data-type="field" id="server-note" placeholder="Ghi chú" >
+                                        {% if item %}
+                                            {{ item.note }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="server-note">Thời gian cập nhật lần cuối</label>
+                                    <div class="form-control" >
+                                        {% if item %}
+                                            {{ item.updated_time }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="server-note">Thời gian tạo</label>
+                                    <div class="form-control" >
+                                        {% if item %}
+                                            {{ item.created_time }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- <div class="d-flex" style="justify-content: center">
+                                    <button id="btn-create" class="btn btn-primary d-none">Lưu</button>
+                                </div> -->
+
+                                <div class="d-flex" style="justify-content: center">
+                                    <button id="btn-test-connection" class="btn btn-light" style="color: #333; border: 1px solid #999; border-radius: 5px">Test Connection</button>
+                                    <!-- <span class="" style="width: 10px"></span>
+                                    <button id="btn-create" class="btn btn-primary">Tạo</button> -->
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+
+            {% include "templates/footer.html" %}
+
+        </div>
+
+    </div>
+    <script type="text/javascript" src="{% static 'vendor.js' %}"></script>
+    <script type="text/javascript" src="{% static 'bundle.js' %}"></script>
+    <script type="text/javascript" src="{% static 'bootstrap.bundle.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'bootstrap-notify.min.js' %}"></script>
+</body>
+
+</html>
