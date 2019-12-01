@@ -5,4 +5,4 @@ app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile("config.py")
 
 def start ():
-	app.run()
+	app.run(host=app.config["HOST"], port=app.config["PORT"])

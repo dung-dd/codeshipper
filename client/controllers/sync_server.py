@@ -7,7 +7,7 @@ import json, jwt
 from tunnel import app
 from models import project, server, config
 from .mapping_errors import mapping_errors, ERRORS_CODE
-
+from models.base import engine
 
 Session = sessionmaker(bind=engine)
 

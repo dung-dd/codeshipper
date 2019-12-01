@@ -83,7 +83,7 @@
             })
         }
         function send_create_server(notify){
-            let url = window.location.origin + window.location.pathname + "/../create_new_server";
+            let url = window.location.origin + window.location.pathname + "/../create_server";
             let name = $("#server-address").val();
             let port = $("#server-port").val();
             let secret = $("#server-secret").val();
@@ -176,7 +176,7 @@
     </script>
 </head>
 
-<body class="app">
+<body class="app is-collapsed">
     {% include "templates/loader.html" %}
 
     <div id="loading" class="d-none" style="position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 10;">

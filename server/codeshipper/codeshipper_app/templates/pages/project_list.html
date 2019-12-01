@@ -6,9 +6,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
-    <title>Forms</title>
+    <title>Danh sách Dự án</title>
+    <script type="text/javascript" src="{% static 'jquery-3.4.1.min.js' %}"></script>
 
-    <link href="{% static 'style.css' }" rel="stylesheet">
+    <link href="{% static 'style.css' %}" rel="stylesheet">
 
     <script type="text/javascript">
         function onclick_create_new_button(){
@@ -16,11 +17,132 @@
             pathname = pathname.replace(new RegExp("//","g"), "/");
             window.location.href = window.location.origin + pathname;
         };
+        function goto_detail(event, id){
+            let target = $(event.target);
+
+            let pathname = new URL(window.location.href).pathname;
+
+            if (pathname.match(new RegExp("list/?"))){
+                pathname = window.location.pathname + "/../" + id;
+            }
+            else{
+                pathname = window.location.pathname + "/" + id;
+            }
+            pathname = pathname.replace("//", "/");
+            if (!( target.attr("data-type") || target.parents('td[data-type="check"]').length )) {
+                window.location.href = pathname;
+            }
+        }
+
+        function onclick_delete_button(){
+            let ids = rows_table;
+            let url = window.location.origin + (window.location.pathname + "/delete").replace("//", "/");
+            let return_url = window.location.href;
+
+            $.ajax({
+                url,
+                type: "POST",
+                headers: { "Content-Type": "application/json" },
+                dataType: "json",
+                data: JSON.stringify({
+                    ids: ids
+                }),
+                timeout: 60000,
+                success: (res)=>{
+                    console.log("res", res);
+                    if (res && res["state"]){
+                        window.open(return_url, "_self");
+                    }
+                    if (res && !res["state"]){
+                        $.notify({
+                            title: "Xóa thất bại\n",
+                            message: res["message"]
+                        },{
+                            type: "danger",
+                            delay: 6000,
+                            showProgressbar: false,
+                            mouse_over: "pause",
+                            template: notify_template,
+                            onClosed: function(){
+
+                            }
+                        });
+                    }
+                },
+                error: (err)=>{
+                    console.log("err", err);
+                    $.notify({
+                        title: "Xóa thất bại",
+                        message: ""
+                    },{
+                        type: "danger",
+                        delay: 6000,
+                        showProgressbar: false,
+                        mouse_over: "pause",
+                        template: notify_template,
+                        onClosed: function(){
+
+                        }
+                    });
+                }
+            });
+        }
+
+        $(document).ready(()=>{
+            $("#btn-delete").on("click", ()=>{
+                $('span[data-type="record_qty"]').text(rows_table.length || "");
+                $("#modal-confirm-delete").modal();
+            });
+            $("#btn-confirm-delete").on("click", ()=>{
+                onclick_delete_button();
+            });
+
+            rows_table = [];
+            $('input[data-type="row-table"]').on("change", (event)=>{
+                let checked = $(event.target).prop("checked");
+                let row_id = $(event.target).val();
+                if (checked == true){
+                    rows_table.push(row_id)
+                }
+                if (checked == false){
+                    rows_table = rows_table.filter(row => row!=row_id);
+                }
+
+                if (rows_table.length){
+                    $("#btn-delete").removeClass("d-none");
+                }
+                else{
+                    $("#btn-delete").addClass("d-none");
+                }
+            });
+        })
     </script>
 </head>
 
-<body class="app">
+<body class="app is-collapsed">
     {% include "templates/loader.html" %}
+
+<!-- Modal -->
+<div class="modal fade" id="modal-confirm-delete" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Xóa?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Bạn có muốn xóa <span data-type="record_qty"></span> bản ghi?
+            </div>
+            <div class="modal-footer">
+                <button id="btn-confirm-delete" type="button" class="btn btn-secondary" data-dismiss="modal">Xóa</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
     <div>
         {% include "templates/left_menu.html" %}
         <div class="page-container">
@@ -32,6 +154,8 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <button onclick="onclick_create_new_button()" class="btn btn-primary">Tạo mới</button>
+                                <span>&nbsp;</span>
+                                <button id="btn-delete" class="btn btn-primary d-none">Xóa</button>
                             </div>
                         </div>
                         <div class="" style="margin-top: 10px">
@@ -40,11 +164,12 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="bgc-white bd bdrs-3 p-20 mB-20">
-                                    <h4 class="c-grey-900 mB-20">Danh sách Server </h4>
+                                    <h4 class="c-grey-900 mB-20">Danh sách Projects </h4>
                                     <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
 
                                         <thead>
                                             <tr>
+                                                <th></th>
                                                 <th>Name</th>
                                                 <th>Service Type</th>
                                                 <th>Server Name</th>
@@ -56,6 +181,7 @@
 
                                         <tfoot>
                                             <tr>
+                                                <th></th>
                                                 <th>Name</th>
                                                 <th>Service Type</th>
                                                 <th>Server Name</th>
@@ -68,8 +194,10 @@
                                         <tbody>
                                             {% if list_data %}
                                                 {% for item in list_data %}
-
-                                                    <tr>
+                                                    <tr onclick="goto_detail(event, {{ item.id }} )">
+                                                        <td data-type="check">
+                                                            <input type="checkbox" value="{{ item.id }}" data-type="row-table">
+                                                        </td>
                                                         <td>{{ item.name }}</td>
                                                         <td>{{ item.port }}</td>
                                                         <td>{{ item.secret }}</td>
@@ -112,6 +240,8 @@
     </div>
     <script type="text/javascript" src="{% static "vendor.js" %}"></script>
     <script type="text/javascript" src="{% static "bundle.js" %}"></script>
+    <script type="text/javascript" src="{% static 'bootstrap.bundle.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'bootstrap-notify.min.js' %}"></script>
 </body>
 
 </html>

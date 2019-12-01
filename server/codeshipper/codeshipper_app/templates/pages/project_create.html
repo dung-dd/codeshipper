@@ -21,6 +21,18 @@
             width: 100%;
             height: 5px;
         }
+        .textarea {
+            background-color: #0F1A28 !important;
+            color: white !important;
+            font-family: monospace !important;
+            line-height: 1.4em !important;
+            min-height: 15em !important;
+        }
+        .btn-action {
+            min-width: 200px !important;
+            padding: 10px !important;
+            font-size: 16px !important;
+        }
     </style>
 
     <script type="text/javascript" src="{% static 'jquery-3.4.1.min.js' %}"></script>
@@ -34,25 +46,59 @@
             }
             return result;
         }
+
+        function onchange_project_type(event){
+            console.log("onchange_project_type", event);
+            var value = $(event.target).val();
+            var url = window.location.href + "/../get_config_project_type";
+            console.log(url, value);
+            $.ajax({
+                url,
+                type: "POST",
+                dataType: "json",
+                headers: { "Content-Type": "application/json" },
+                data: JSON.stringify({id: value}),
+                success: (res)=>{
+                    if (!res["state"]) return ;
+                    let data = res["data"];
+                    console.log('data', data);
+                    if (data && data["configuration"]){
+                        console.log("x", $("#project-config-service"))
+                        $("#project-config-service").val(data["configuration"]);
+                    }
+                    if (data && data["script"]){
+                        $("#project-script-deploy").val(data["script"]);
+                    }
+
+                },
+                error: (err)=>{
+                    console.log("err", err);
+                }
+
+            })
+        }
+
         function send_create(notify){
             let url = window.location.origin + window.location.pathname + "/../create_new_project";
             let name = $("#project-name").val();
             let code = $("#project-code").val();
             let server = $("#project-server").val();
             let type = $("#project-type").val();
+            let config_path = $("#project-config-path").val();
             let config_service = $("#project-config-service").val();
-            let variables = $("#project-config-variables").val();
             let script_deploy = $("#project-script-deploy").val();
             let note = $("#project-note").val();
 
+            let body = {
+                name, code, server, type, config_path, config_service, script_deploy, note
+            };
+            console.log("body", body);
             $.ajax({
                 url,
                 type: "POST",
                 headers: { "Content-Type": "application/json" },
                 dataType: "json",
-                data: JSON.stringify({
-                    name, code, server, type, config_service, variables, script_deploy, note
-                }),
+                data: JSON.stringify(body),
                 success: function(res){
                     console.log("on success", res);
                     notify.close();
@@ -119,7 +165,7 @@
 
 </head>
 
-<body class="app">
+<body class="app is-collapsed">
     {% include "templates/loader.html" %}
     <div>
         {% include "templates/left_menu.html" %}
@@ -154,28 +200,44 @@
 
                                 <div class="form-group">
                                     <label for="project-server">Server *</label>
-                                    <input class="form-control" id="project-server" placeholder="Server Deploy">
+                                    <select class="form-control" id="project-server" onchange="onchange_server(event)">
+                                        <option class="form-control" value="">Server Deploy</option>
+                                        {% if server_list %}
+                                            {% for server in server_list %}
+                                                <option class="form-control" value="{{ server.id }}" >{{ server.name }}</option>
+
+                                            {% endfor %}
+                                        {% endif %}
+                                    </select>
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="project-type">Type *</label>
-                                    <input class="form-control" id="project-type" placeholder="Project Type">
+                                    <label for="project-type">Type</label>
+                                    <select class="form-control" id="project-type" onchange="onchange_project_type(event)">
+                                        <option class="form-control" value="">Project Type</option>
+                                        {% if project_type_list %}
+                                            {% for project_type in project_type_list %}
+                                                <option value="{{ project_type.id }}" >{{ project_type.name }}</option>
+
+                                            {% endfor %}
+                                        {% endif %}
+                                    </select>
+
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="project-config-service">Config *</label>
-                                    <textarea class="form-control" id="project-config-service" placeholder="Project Config"></textarea>
+                                    <label for="project-config-path">Config path</label>
+                                    <input class="form-control" id="project-config-path" placeholder="Config Path">
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="project-config-variables">Variables</label>
-                                    <textarea class="form-control" id="project-config-variables" placeholder="Project Variables"></textarea>
-                                    <small class="form-text text-muted">Variables name CONFIG_PATH, SOURCE_PATH.</small>
+                                    <label for="project-config-service">Config</label>
+                                    <textarea class="form-control textarea" id="project-config-service" placeholder="Project Config"></textarea>
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="project-script-deploy">Script</label>
-                                    <textarea class="form-control" id="project-script-deploy" placeholder="Script Config"></textarea>
+                                    <label for="project-script-deploy">Bash Script</label>
+                                    <textarea class="form-control textarea" id="project-script-deploy" placeholder="Bash Script"></textarea>
                                 </div>
 
                                 <div class="form-group">
@@ -186,7 +248,7 @@
                                 <div class="d-flex" style="justify-content: center">
                                     <!-- <button id="btn-test-connection" class="btn btn-light" style="color: #333; border: 1px solid #999; border-radius: 5px">Test Connection</button>
                                     <span class="" style="width: 10px"></span> -->
-                                    <button id="btn-create" class="btn btn-primary">Tạo</button>
+                                    <button id="btn-create" class="btn btn-primary btn-action">Tạo Mới Project</button>
                                 </div>
 
                             </div>
