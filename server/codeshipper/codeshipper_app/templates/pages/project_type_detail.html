@@ -38,6 +38,9 @@
     }
 </style> -->
     <style type="text/css">
+        div[data-notify="container"]{
+            word-break: break-word;
+        }
         [role="alert"] .progress {
             margin-bottom: 0px !important;
             position: absolute;
@@ -104,6 +107,61 @@
                 $("#btn-save").toggle();
                 $("#btn-cancel-edit").toggle();
                 $("#btn-delete").toggle();
+            });
+
+            $("#btn-confirm-delete").on("click", ()=>{
+                let url = window.location.origin + (window.location.pathname + "/../delete").replace("//", "/");
+				let return_url = window.location.origin + (window.location.pathname + "/..").replace("//", "/");
+				let id = $("#item_id").val();
+
+                $.ajax({
+					url,
+					type: "POST",
+					headers: { "Content-Type": "application/json" },
+					dataType: "json",
+					data: JSON.stringify({
+						id: id
+					}),
+					timeout: 60000,
+					success: (res)=>{
+						console.log("res", res);
+						if (res && res["state"]){
+							window.open(return_url, "_self");
+						}
+						if (res && !res["state"]){
+							$.notify({
+								title: "Xóa thất bại\n",
+								message: res["message"]
+							},{
+								type: "danger",
+								delay: 6000,
+								showProgressbar: false,
+								mouse_over: "pause",
+								template: notify_template,
+								onClosed: function(){
+
+								}
+							});
+						}
+					},
+					error: (err)=>{
+						console.log("err", err);
+						$.notify({
+							title: "Xóa thất bại",
+							message: ""
+						},{
+							type: "danger",
+							delay: 6000,
+							showProgressbar: false,
+							mouse_over: "pause",
+							template: notify_template,
+							onClosed: function(){
+
+							}
+						});
+					}
+				});
+
             });
 
             $("#btn-save").on("click", ()=>{
@@ -183,7 +241,7 @@
 
 </head>
 
-<body class="app is-collapsed">
+<body class="app">
     {% include "templates/loader.html" %}
 
 <!-- Modal -->
@@ -206,6 +264,12 @@
         </div>
     </div>
 </div>
+
+    <input id="item_id" hidden value="{{item.id}}" />
+	<div id="loading" class="d-none" style="position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 10;">
+		<div>
+		</div>
+	</div>
 
     <div>
         {% include "templates/left_menu.html" %}

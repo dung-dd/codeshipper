@@ -8,7 +8,7 @@ HOST = '0.0.0.0'
 PORT = 5556
 
 SUPPER_SECRET = "erudite"
-SECRET_KEY = "".join(random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for i in range(32))
+# SECRET_KEY = "".join(random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for i in range(32))
 SQLALCHEMY_DATABASE_URI = "sqlite:///"+db_file
 MY_FIELD  = "myconfig"
 

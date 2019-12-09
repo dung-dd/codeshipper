@@ -13,6 +13,9 @@
     <link href="{% static 'animate.css' %}" rel="stylesheet">
 
     <style >
+        div[data-notify="container"]{
+            word-break: break-word;
+        }
         [role="alert"] .progress {
             margin-bottom: 0px !important;
             position: absolute;
@@ -79,7 +82,7 @@
         }
 
         function send_create(notify){
-            let url = window.location.origin + window.location.pathname + "/../create_new_project";
+            let url = window.location.origin + window.location.pathname + "/../create_project";
             let name = $("#project-name").val();
             let code = $("#project-code").val();
             let server = $("#project-server").val();
@@ -165,7 +168,7 @@
 
 </head>
 
-<body class="app is-collapsed">
+<body class="app">
     {% include "templates/loader.html" %}
     <div>
         {% include "templates/left_menu.html" %}

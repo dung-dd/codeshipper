@@ -38,6 +38,9 @@
     }
 </style> -->
     <style type="text/css">
+        div[data-notify="container"]{
+            word-break: break-word;
+        }
         [role="alert"] .progress {
             margin-bottom: 0px !important;
             position: absolute;
@@ -171,7 +174,7 @@
 
 </head>
 
-<body class="app is-collapsed">
+<body class="app">
     {% include "templates/loader.html" %}
     <div>
         {% include "templates/left_menu.html" %}

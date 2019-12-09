@@ -1,23 +1,36 @@
 from django.shortcuts import render, redirect
 # Create your views here.
 from django.http import HttpResponse
-import codeshipper_app
 import os
+
+from django.contrib.auth.models import User
+
+import codeshipper_app
+from codeshipper_app.models.server import Server
+from codeshipper_app.models.project import Project
+from codeshipper_app.models.updating import Updating 
 
 def root_path(request):
     if (request.get_full_path() == "/"):
         return redirect("/cs/")
 
-    context = {}
+    total_servers   = Server.objects.filter().count() or 0
+    total_projects  = Project.objects.filter().count() or 0
+    total_users     = User.objects.filter().count() or 0
+    total_updatings = Updating.objects.filter().count() or 0
+
+    context = {
+        "total_servers": total_servers,
+        "total_projects": total_projects,
+        "total_users": total_users,
+        "total_updatings": total_updatings,
+    }
     content_type = "application/html"
     template_name = "pages/index.html"
     return HttpResponse(render(request, template_name, context=context, content_type=content_type))
 
 def index(request):
-    context = {}
-    content_type = "application/html"
-    template_name = "pages/index.html"
-    return HttpResponse(render(request, template_name, context=context, content_type=content_type))
+    return root_path(request)
 
 
 def left_menu_users(request):

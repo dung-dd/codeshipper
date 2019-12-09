@@ -19,27 +19,46 @@ def test_connection(request):
         body_json = json.loads(request.body)
     except:
         body_json = None
+    
+    name = body_json.get("name")
+    port = body_json.get("port")
+    secret = body_json.get("secret")
 
-    if not body_json or not body_json.get("name") or not body_json.get("name").strip() or not body_json.get("port") or not body_json.get("port").strip() or not body_json.get("secret"):
+    if not name:
+        return HttpResponse(json.dumps({ "state": 0, "message": "Địa chỉ server không tồn tại" }))
+    if not port:
+        return HttpResponse(json.dumps({ "state": 0, "message": "Cổng không tồn tại" }))
+    if not secret:
+        return HttpResponse(json.dumps({ "state": 0, "message": "Mã bí mật không tồn tại" }))
+
+    name = name.strip()
+    port = port.strip()
+    secret = secret.strip()
+    if not name or not port or not secret:
         return HttpResponse(json.dumps({ "state": 0, "message": "Dữ liệu không hợp lệ" }))
 
     uri = body_json.get("name")+":"+body_json.get("port") + "/test_connection"
     if not uri.startswith("https?://"):
-        uri += "http://"
+        uri = "http://" + uri 
 
-    data = json.dumps({
+    data = {
         "command": "test_connection",
         "echo": "hello client"
-    })
-    headers = { "Content-Type": "application/json" }
+    }
+    data = jwt.encode(data, secret)
+    headers = { }
+    print ("test connection", uri, data, headers)
     try:
         r = requests.post(uri, data=data, headers=headers)
-        connect_ok = r.data.state
+        
+        res = json.loads(r.text)
+        if not res["code"]:
+            connect_state = 1
+            connect_message = res["message"]
 
-        if not connect_ok:
-            connect_error = connect_ok = r.data.message
-    except:
-        r = None
+    except Exception as e:
+        connect_state = 0
+        connect_message = repr(e)
 
     return HttpResponse(json.dumps({"state": connect_state, "message": connect_message}))
 

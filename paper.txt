@@ -4,3 +4,7 @@ Các sản phẩm tương tự
 		DeployBot https://deploybot.com/
 
 	https://vi.wikipedia.org/wiki/Jenkins_(ph%E1%BA%A7n_m%E1%BB%81m)
+
+
+So sánh với các công cụ khác, và công cụ quản trị mạng ( quản trị network ), mô tả các tính năng 
+

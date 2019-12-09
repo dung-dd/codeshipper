@@ -10,7 +10,7 @@
     <link href="{% static "style.css" %}" rel="stylesheet">
 </head>
 
-<body class="app is-collapsed">
+<body class="app">
     {% include "templates/loader.html" %}
     <div>
         {% include "templates/left_menu.html" %}
@@ -34,7 +34,7 @@
                                                 <div class="peer peer-greed" style="display: flex; font-size: 2em; ">
                                                     <i class="c-green-500 ti-server" ></i>
                                                 </div>
-                                                <div class="peer"><span class="d-ib lh-0 va-m fw-600 bdrs-10em pX-15 pY-15 bgc-green-50 c-green-500">10</span></div>
+                                                <div class="peer"><span class="d-ib lh-0 va-m fw-600 bdrs-10em pX-15 pY-15 bgc-green-50 c-green-500">{{ total_servers }}</span></div>
                                             </div>
                                         </div>
                                     </div>
@@ -49,7 +49,7 @@
                                                 <div class="peer peer-greed" style="display: flex; font-size: 2em; ">
                                                     <i class="c-red-500 ti-bag"></i>
                                                 </div>
-                                                <div class="peer"><span class="d-ib lh-0 va-m fw-600 bdrs-10em pX-15 pY-15 bgc-red-50 c-red-500">17</span></div>
+                                                <div class="peer"><span class="d-ib lh-0 va-m fw-600 bdrs-10em pX-15 pY-15 bgc-red-50 c-red-500">{{ total_projects }}</span></div>
                                             </div>
                                         </div>
                                     </div>
@@ -63,7 +63,7 @@
                                                 <div class="peer peer-greed" style="display: flex; font-size: 2em; ">
                                                     <i class="c-purple-500 ti-user"></i>
                                                 </div>
-                                                <div class="peer"><span class="d-ib lh-0 va-m fw-600 bdrs-10em pX-15 pY-15 bgc-purple-50 c-purple-500">12</span></div>
+                                                <div class="peer"><span class="d-ib lh-0 va-m fw-600 bdrs-10em pX-15 pY-15 bgc-purple-50 c-purple-500">{{ total_users }}</span></div>
                                             </div>
                                         </div>
                                     </div>
@@ -77,7 +77,7 @@
                                                 <div class="peer peer-greed" style="display: flex; font-size: 2em; ">
                                                     <i class="c-blue-500 ti-reload"></i>
                                                 </div>
-                                                <div class="peer"><span class="d-ib lh-0 va-m fw-600 bdrs-10em pX-15 pY-15 bgc-blue-50 c-blue-500">33</span></div>
+                                                <div class="peer"><span class="d-ib lh-0 va-m fw-600 bdrs-10em pX-15 pY-15 bgc-blue-50 c-blue-500">{{ total_updatings }}</span></div>
                                             </div>
                                         </div>
                                     </div>
@@ -144,7 +144,7 @@
                             </div>
                         </div> -->
 
-                        <div class="masonry-item col-md-6">
+                        <!-- <div class="masonry-item col-md-6">
                             <div class="bd bgc-white">
                                 <div class="layers">
                                     <div class="layer w-100 pX-20 pT-20">
@@ -162,8 +162,8 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="masonry-item col-md-6">
+                        </div> -->
+                        <!-- <div class="masonry-item col-md-6">
                             <div class="bd bgc-white p-20">
                                 <div class="layers">
                                     <div class="layer w-100 mB-10">
@@ -215,8 +215,8 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="masonry-item col-md-6">
+                        </div> -->
+                        <!-- <div class="masonry-item col-md-6">
                             <div class="bd bgc-white">
                                 <div class="layers">
                                     <div class="layer w-100 p-20">
@@ -292,8 +292,8 @@
                                 </div>
                                 <div class="ta-c bdT w-100 p-20"><a href="#">Check all the sales</a></div>
                             </div>
-                        </div>
-                        <div class="masonry-item col-md-6">
+                        </div> -->
+                        <!-- <div class="masonry-item col-md-6">
                             <div class="bd bgc-white p-20">
                                 <div class="layers">
                                     <div class="layer w-100 mB-20">
@@ -372,8 +372,8 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="masonry-item col-md-6">
+                        </div> -->
+                        <!-- <div class="masonry-item col-md-6">
                             <div class="bd bgc-white">
                                 <div class="layers">
                                     <div class="layer w-100 p-20">
@@ -434,7 +434,8 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
+
                     </div>
                 </div>
             </main>

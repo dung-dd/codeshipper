@@ -12,6 +12,9 @@
     <link href="{% static 'animate.css' %}" rel="stylesheet">
 
     <style >
+        div[data-notify="container"]{
+            word-break: break-word;
+        }
         [role="alert"] .progress {
             margin-bottom: 0px !important;
             position: absolute;
@@ -92,7 +95,6 @@
                     });
                 },
                 error: (err)=>{
-                    console.log("on error", err, notify);
                     notify.close();
                     $.notify({
                         title: "Kiểm tra thất bại",
@@ -102,6 +104,9 @@
                         delay: 5000,
                         mouse_over: "pause",
                     });
+                },
+                complete: ()=>{
+                    enabled(["server-address", "server-secret", "server-secret", "btn-test-connection"]);
                 }
             })
         }
@@ -279,7 +284,7 @@
     </script>
 </head>
 
-<body class="app is-collapsed">
+<body class="app">
     {% include "templates/loader.html" %}
 
 <!-- Modal -->

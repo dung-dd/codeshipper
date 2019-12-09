@@ -2,3 +2,4 @@ django==2.2
 requests
 PyJWT==1.6.4
 pytz
+requests

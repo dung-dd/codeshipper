@@ -32,7 +32,6 @@ urlpatterns = [
     url(r"^project/update/?$", project.controllers.update_project, name="index"),
     url(r"^project/delete/?$", project.controllers.delete_project, name="index"),
 
-
     url(r"^project/type/?$", project.left_menu_project_type, name="index"),
     url(r"^project/type/create/?$", project.left_menu_project_type_create, name="index"),
     url(r"^project/type/create_project_type/?$", project.controllers.pt.pt_create_project_type, name="index"),
@@ -43,6 +42,16 @@ urlpatterns = [
     url(r"^project/get_config_project_type/?$", project.controllers.pt.get_config_project_type, name="index"),
 
     url(r"^user/?$", misc.left_menu_users, name="index"),
+
+
+    # Updating
+    url(r"^updating/?$", updating.left_menu_updating, name="index"),
+    url(r"^updating/list/?$", updating.left_menu_updating, name="index"),
+    url(r"^updating/create/?$", updating.updating_create, name="index"),
+    path(r"updating/<str:updating_id>/", updating.updating_detail, name="index"),
+    
+    url(r"updating/get_config_project/?", updating.controllers.get_config_project, name="index"),
+    url(r"updating/create_updating/?", updating.controllers.create_updating, name="create_updating_api"),
 
     # fonts
     url(r"a1ecc3b826d01251edddf29c3e4e1e97.woff/?$", misc.a1ecc3b826d01251edddf29c3e4e1e97_woff),
