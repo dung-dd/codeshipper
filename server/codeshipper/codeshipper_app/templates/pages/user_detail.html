@@ -1,0 +1,581 @@
+{% load static %}
+
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
+	<title>Chi tiết User</title>
+
+	<!-- <link href="{% static 'bootstrap.min.css' %}" rel="stylesheet"> -->
+	<link href="{% static 'style.css' %}" rel="stylesheet">
+	<link href="{% static 'animate.css' %}" rel="stylesheet">
+
+	<style >
+		.delete-role:hover{
+			cursor: pointer;
+		}
+		div[data-notify="container"]{
+            word-break: break-word;
+        }
+		[role="alert"] .progress {
+			margin-bottom: 0px !important;
+			position: absolute;
+			bottom: 0px;
+			left: 0px;
+			width: 100%;
+			height: 5px;
+		}
+		.textarea {
+			background-color: #0F1A28 !important;
+			color: white !important;
+			font-family: monospace !important;
+			line-height: 1.4em !important;
+			min-height: 15em !important;
+		}
+		.btn-action {
+			min-width: 200px !important;
+			padding: 10px !important;
+			font-size: 16px !important;
+		}
+		.form-control{
+			min-height: 35px;
+		}
+        table {
+            counter-reset: tableCount;
+        }
+        .counterCell {
+            text-align: center;
+        }
+        .counterCell:before {
+            content: counter(tableCount);
+            counter-increment: tableCount;
+        }
+	</style>
+
+	<script type="text/javascript" src="{% static 'jquery-3.4.1.min.js' %}"></script>
+	{{ cs_data | json_script:"cs_data" }}
+	<script type="text/javascript">
+notify_template = '<div data-notify="container" class="col-xs-11 col-sm-3 alert alert-{0}" role="alert">' +
+	'<button type="button" aria-hidden="true" class="close" data-notify="dismiss">×</button>' +
+	'<span data-notify="icon"></span> ' +
+	'<span data-notify="title">{1}</span> ' +
+	'<div data-notify="message">{2}</div>' +
+	'<div class="progress" data-notify="progressbar">' +
+		'<div class="progress-bar progress-bar-{0}" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>' +
+	'</div>' +
+	'<a href="{3}" target="{4}" data-notify="url"></a>' +
+'</div>'
+		function random_string(length) {
+			var result           = '';
+			var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+			var charactersLength = characters.length;
+			for ( var i = 0; i < length; i++ ) {
+				result += characters.charAt(Math.floor(Math.random() * charactersLength));
+			}
+			return result;
+		}
+
+		function onchange_add_role_type() {
+			let type = $("#add-role-type").val();
+			if (type == "server"){
+				$('[data-for="add-role-servers"]').removeClass("d-none");
+				$('[data-for="add-role-projects"]').addClass("d-none");
+			}
+			if (type == "project"){
+				$('[data-for="add-role-projects"]').removeClass("d-none");
+				$('[data-for="add-role-servers"]').addClass("d-none");
+			}
+		}
+
+		
+		function reset_data(){
+			let item = cs_data["item"];
+			$("#project-name").val(item.name);
+			$("#project-code").val(item.code);
+			$("#project-server").val(item.server);
+			$("#project-type").val(item.type);
+			$("#project-config-path").val(item.config_path);
+			$("#project-config-service").val(item.config_service);
+			$("#project-script-deploy").val(item.script_deploy);
+			$("#project-note").val(item.note);
+			$('[data-type="field"]').attr("disabled", true);
+		}
+
+		function send_update(notify){
+			let url = window.location.origin + (window.location.pathname + "/../update").replace("//", "/");
+			let id = $("#item_id").val().trim();
+			let name = $("#project-name").val().trim();
+			let code = $("#project-code").val().trim();
+			let server = $("#project-server").val().trim();
+			let type = $("#project-type").val().trim();
+			let config_path = $("#project-config-path").val().trim();
+			let config_service = $("#project-config-service").val().trim();
+			let script_deploy = $("#project-script-deploy").val().trim();
+			let note = $("#project-note").val().trim();
+
+			let body = {
+				id, name, code, server, type, config_path, config_service, script_deploy, note
+			};
+			console.log("body", body);
+			$.ajax({
+				url,
+				type: "POST",
+				headers: { "Content-Type": "application/json" },
+				dataType: "json",
+				data: JSON.stringify(body),
+				success: function(res){
+					notify.close();
+
+					let title = "Cập nhật thất bại";
+					let type  = "danger";
+					if (res.state){
+						type = "success";
+						title = "Cập nhật thành công";
+					}
+					else{ title = res.message; }
+					$.notify({
+						title, message: ""
+					}, {
+						type,
+						delay: 5000,
+						mouse_over: "pause",
+					});
+				},
+				error: function(err){
+					console.log("error update", err);
+					notify.close();
+					$.notify({
+					   title: "Cập nhật thất bại<br/>",
+					   message: "",
+					},{
+					   type: "danger",
+					   delay: 10000,
+					   mouse_over: "pause",
+
+					   onClosed: function(){
+					   }
+				   });
+
+				}
+			})
+		}
+		function onclick_delete_role(role_id) {
+			console.log("role_id", role_id);
+			let notify = $.notify({
+                    title: "Đang xóa role ...",
+                    message: "",
+                },{
+                    type: "info",
+                    delay: 10000,
+                    mouse_over: "pause",
+
+                    onClosed: function(){
+                    }
+                });
+			let url = "/cs/user/delete_role";
+			let return_url = window.location.href;
+
+			$.ajax({
+				url,
+				type: "POST",
+				headers: { "Content-Type": "application/json" },
+				dataType: "json",
+				data: JSON.stringify({
+					role_id: role_id
+				}),
+				timeout: 60000,
+				success: (res)=>{
+					console.log("res", res);
+					notify.close();
+					if (res && res["state"]){
+						// window.open(return_url, "_self");
+						window.location.reload();
+					}
+					if (res && !res["state"]){
+						$.notify({
+							title: "Xóa thất bại\n",
+							message: res["message"]
+						},{
+							type: "danger",
+							delay: 6000,
+							showProgressbar: false,
+							mouse_over: "pause",
+							template: notify_template,
+							onClosed: function(){
+
+							}
+						});
+					}
+				},
+				error: (err)=>{
+					console.log("err", err);
+					notify.close();
+					$.notify({
+						title: "Xóa thất bại",
+						message: ""
+					},{
+						type: "danger",
+						delay: 6000,
+						showProgressbar: false,
+						mouse_over: "pause",
+						template: notify_template,
+						onClosed: function(){
+
+						}
+					});
+				},
+				complete: ()=>{
+					
+				}
+			});
+		}
+		$(document).ready(()=>{
+			cs_data = JSON.parse($("#cs_data").text());
+			$("#btn-add-role").on("click", ()=> {
+				$("#modal-add-role").modal();	
+			});
+
+			$("#btn-save").on("click", ()=>{
+                let notify = $.notify({
+                    title: "Đang cập nhật",
+                    message: "",
+                },{
+                    type: "info",
+                    delay: 10000,
+                    mouse_over: "pause",
+
+                    onClosed: function(){
+                    }
+                });
+                send_update(notify);
+            });
+
+			$("#btn-confirm-delete").on("click", ()=>{
+				let url = window.location.origin + (window.location.pathname + "/../delete").replace("//", "/");
+				let return_url = window.location.origin + (window.location.pathname + "/../").replace("//", "/");
+				let id = $("#item_id").val();
+
+				$.ajax({
+					url,
+					type: "POST",
+					headers: { "Content-Type": "application/json" },
+					dataType: "json",
+					data: JSON.stringify({
+						id: id
+					}),
+					timeout: 60000,
+					success: (res)=>{
+						console.log("res", res);
+						if (res && res["state"]){
+							// window.open(return_url, "_self");
+							window.location.reload();
+						}
+						if (res && !res["state"]){
+							$.notify({
+								title: "Xóa thất bại\n",
+								message: res["message"]
+							},{
+								type: "danger",
+								delay: 6000,
+								showProgressbar: false,
+								mouse_over: "pause",
+								template: notify_template,
+								onClosed: function(){
+
+								}
+							});
+						}
+					},
+					error: (err)=>{
+						console.log("err", err);
+						$.notify({
+							title: "Xóa thất bại",
+							message: ""
+						},{
+							type: "danger",
+							delay: 6000,
+							showProgressbar: false,
+							mouse_over: "pause",
+							template: notify_template,
+							onClosed: function(){
+
+							}
+						});
+					}
+				});
+			});
+
+			$("#btn-confirm-add-role").on("click", ()=>{
+				let type = $("#add-role-type").val();
+				let server_id = $("#add-role-servers").val();
+				let project_id = $("#add-role-projects").val();
+				let role = $("#add-role-role").val();
+				let user_id = $("#item_id").val();
+				let url = window.location.origin +  "/cs/user/add_role/";
+				let return_url = window.location.href;
+				let notity = $.notify({
+					title: "Đang tạo ...\n",
+					message: ""
+				},{
+					type: "info",
+					delay: 6000,
+					showProgressbar: false,
+					mouse_over: "pause",
+					template: notify_template,
+				});
+				$.ajax({
+					url,
+					type: "POST",
+					headers: { "Content-Type": "application/json" },
+					dataType: "json",
+					data: JSON.stringify({
+						type, server_id, project_id, role, user_id
+					}),
+					timeout: 6000,
+					success: (res)=>{
+						console.log("res", res);
+						notity.close();
+						if (res && res["state"]){
+							// window.open(return_url, "_self");
+							window.location.reload();
+						}
+						if (res && !res["state"]){
+							$.notify({
+								title: "Thêm mới thất bại\n",
+								message: res["message"]
+							},{
+								type: "danger",
+								delay: 6000,
+								showProgressbar: false,
+								mouse_over: "pause",
+								template: notify_template,
+								onClosed: function(){
+
+								}
+							});
+						}
+					},
+					error: (err)=>{
+						console.log("err", err);
+						notity.close();
+						$.notify({
+							title: "Thêm mới thất bại",
+							message: ""
+						},{
+							type: "danger",
+							delay: 6000,
+							showProgressbar: false,
+							mouse_over: "pause",
+							template: notify_template,
+							onClosed: function(){
+
+							}
+						});
+					}
+				});
+			});
+			
+		});
+
+	</script>
+
+</head>
+
+<body class="app">
+	{% include "templates/loader.html" %}
+
+<!-- Modal -->
+<div class="modal fade" id="modal-add-role" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLongTitle">Thêm mới role</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="form-group">
+					<label for="">Phân quyền cho </label>
+					<select class="form-control" name="type" id="add-role-type" onchange="onchange_add_role_type()">
+						<option value="server">Server</option>
+						<option value="project">Project</option>
+					</select>
+
+				</div>
+				<div class="form-group" data-for="add-role-servers">
+					<label for="">Server</label>
+					<select class="form-control" name="add-role-servers" id="add-role-servers" >
+						{% if list_servers %}
+							{% for server in list_servers %}
+								<option value="{{server.id}}" >{{server.host}}</option>
+							{% endfor %}
+						{% else %}
+							<option value=""> Không có Server trên hệ thống </option>
+						{% endif %}
+					</select>
+				</div>
+				<div class="form-group d-none" data-for="add-role-projects">
+					<label for="">Project</label>
+					<select class="form-control" name="add-role-servers" id="add-role-projects" >
+						{% if list_projects %}
+							{% for project in list_projects %}
+								<option value="{{project.id}}" >{{project.name}}</option>
+							{% endfor %}
+						{% else %}
+							<option value=""> Không có Project trên hệ thống </option>
+						{% endif %}
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="">Vai trò</label>
+					<select data-for="add-role-servers" class="form-control" name="add-role-servers" id="add-role-servers">
+						<option value="manage" >Manage</option>
+					</select>
+					<select data-for="add-role-projects" class="form-control d-none" name="add-role-servers" id="add-role-servers">
+						<option value="manage" >Manage</option>
+					</select>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary" data-dismiss="modal" id="btn-confirm-add-role">Thêm</button>
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+	<input id="item_id" hidden value="{{item.id}}" />
+	<div id="loading" class="d-none" style="position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 10;">
+		<div>
+		</div>
+	</div>
+
+	<div>
+		{% include "templates/left_menu.html" %}
+		<div class="page-container">
+			{% include "templates/header.html" %}
+			<main class="main-content bgc-grey-100">
+				<div id="mainContent">
+					<div class="masonry-">
+
+						<div class="row">
+							<div class="col-md-12">
+								<button id="btn-add-role" class="btn btn-primary">Thêm mới Role</button> 
+							</div>
+						</div>
+						<div class="" style="margin-top: 10px"></div>
+
+						<div class="bgc-white p-20 bd">
+							<!-- <h6 class="c-grey-900">Tạo mới Server</h6> -->
+							<div class="mT-30">
+
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label for="project-code">Username</label>
+                                            <input disabled data-type="field" class="form-control" id="first-name" placeholder="" value="{{ item.username }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="project-code">Email</label>
+                                            <input disabled data-type="field" class="form-control" id="last-name" placeholder="" value="{{ item.email }}">
+                                        </div>
+                                    </div>
+								</div>
+
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label for="project-code">First Name</label>
+                                            <input disabled data-type="field" class="form-control" id="first-name" placeholder="" value="{{ item.first_name }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="project-code">Last Name</label>
+                                            <input disabled data-type="field" class="form-control" id="last-name" placeholder="" value="{{ item.last_name }}">
+                                        </div>
+                                    </div>
+								</div>
+
+                                <hr />
+
+                                <div class="form-group">
+
+									<h4 >Roles</h4>
+
+                                    <div class="col-md-12">
+                                        <table id="dataTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
+
+                                            <thead>
+                                                <tr>
+                                                    <th></th>
+                                                    <th>Type</th>
+                                                    <th>Name</th>
+                                                    <th>Role</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+
+                                            <tfoot>
+                                                <tr>
+                                                    <th ></th>
+                                                    <th>Type</th>
+                                                    <th>Name</th>
+                                                    <th>Role</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </tfoot>
+
+                                            <tbody>
+                                                {% if list_roles %}
+													{% for role in list_roles %}
+
+													<tr >
+														<td data-type="check" class="counterCell" >
+														</td>
+														<td>{{ role.type }}</td>
+														{% if role.server_name %}
+															<td>{{ role.server_name }}</td>
+														{% endif %}
+														{% if role.project_name %}
+															<td>{{ role.project_name }}</td>
+														{% endif %}
+														
+														<td>{{ role.role }}</td>
+														<td>
+															<span title="Delete" class="delete-role" onclick="onclick_delete_role({{role.id}})">
+																<i class="ti-trash"></i>
+															</span>
+														</td>
+													</tr>
+
+													{% endfor %}
+                                                {% endif %}
+
+                                            </tbody>
+
+                                        </table>
+                                    </div>
+
+                                </div>
+
+
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</main>
+
+			{% include "templates/footer.html" %}
+
+		</div>
+	</div>
+	<script type="text/javascript" src="{% static 'vendor.js' %}"></script>
+	<script type="text/javascript" src="{% static 'bundle.js' %}"></script>
+	<script type="text/javascript" src="{% static 'bootstrap.bundle.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'bootstrap-notify.min.js' %}"></script>
+</body>
+
+</html>
