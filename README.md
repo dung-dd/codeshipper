@@ -75,3 +75,14 @@ bundle exec rake db:schema:load
 # location and make sudo unecessary.
 curl -sSL https://raw.githubusercontent.com/codeship/scripts/master/packages/meteor.sh | bash -s
 meteor npm install
+
+
+nếu nâng cấp source 
+    - tạo bản nâng cấp ở /tmp
+        + lưu vào folder /temp_dir/project_code/version/file_zip 
+
+    - tạo bản backup ở cùng thư mục với tên khác
+        + tìm các file, folder ở thư mục đích, tạo file zip và lưu dưới tên /temp_dir/project_code/version/file_zip.sc_before   
+    - nâng cấp
+        + Nâng cấp, nếu sau khi run deploy_script không thành công, thực hiện backup.
+        

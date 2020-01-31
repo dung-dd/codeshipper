@@ -6,7 +6,11 @@ from codeshipper_app.models.server import Server
 import json, pytz
 
 def left_menu_server(request):
-    servers = Server.objects.filter()
+    user = request.user 
+    if not user.id:
+        return redirect("/accounts/login/")
+
+    servers = Server.objects.filter().order_by("-id")
     context = {
         "list_data": servers
     }
@@ -16,6 +20,10 @@ def left_menu_server(request):
 
 
 def server_create(request):
+    user = request.user 
+    if not user.id:
+        return redirect("/accounts/login/")
+
     context = {}
     content_type = "application/html"
     template_name = "pages/server_create.html"
@@ -23,6 +31,10 @@ def server_create(request):
 
 
 def server_detail(request, server_id):
+    user = request.user 
+    if not user.id:
+        return redirect("/accounts/login/")
+
     server = Server.objects.filter(id=server_id)
     if (len(server)):
         server = server[0]
@@ -49,6 +61,10 @@ def server_detail(request, server_id):
 
 
 def server_edit(request):
+    user = request.user 
+    if not user.id:
+        return redirect("/accounts/login/")
+        
     context = {}
     content_type = "application/html"
     template_name = "pages/server_edit.html"

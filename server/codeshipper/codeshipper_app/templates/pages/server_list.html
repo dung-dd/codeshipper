@@ -64,7 +64,7 @@
             let ids = rows_table;
             let url = window.location.origin + (window.location.pathname + "/delete").replace("//", "/");
             let return_url = window.location.href;
-                
+
             $.ajax({
                     url,
                     type: "POST",
@@ -189,8 +189,6 @@
                                                 <th></th>
                                                 <th>Name</th>
                                                 <th>Port</th>
-                                                <th>Secret</th>
-                                                <th>Note</th>
                                                 <th>Updated time</th>
                                                 <th>Created time</th>
                                             </tr>
@@ -201,8 +199,6 @@
                                                 <th ></th>
                                                 <th>Name</th>
                                                 <th>Port</th>
-                                                <th>Secret</th>
-                                                <th>Note</th>
                                                 <th>Updated time</th>
                                                 <th>Created time</th>
                                             </tr>
@@ -218,8 +214,6 @@
                                                         </td>
                                                         <td>{{ item.name }}</td>
                                                         <td>{{ item.port }}</td>
-                                                        <td>{{ item.secret }}</td>
-                                                        <td>{{ item.note }}</td>
                                                         <td>{{ item.updated_time }}</td>
                                                         <td>{{ item.created_time }}</td>
                                                     </tr>
@@ -241,9 +235,9 @@
 
         </div>
     </div>
+    <script type="text/javascript" src="{% static 'bootstrap.bundle.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'vendor.js' %}"></script>
     <script type="text/javascript" src="{% static 'bundle.js' %}"></script>
-    <script type="text/javascript" src="{% static 'bootstrap.bundle.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'bootstrap-notify.min.js' %}"></script>
 </body>
 

@@ -200,6 +200,7 @@ input:checked + .slider:before {
 					if (!res["state"] || !res["data"]) return ;
 					let data = res["data"];
 
+					$("#update-source-code-path").val(data["source_code_path"]);
 					$("#update-config-path").val(data["config_path"]);
 					$("#update-config-service").val(data["config_service"]);
 					$("#update-script-deploy").val(data["script_deploy"]);

@@ -6,7 +6,7 @@ from django.views.decorators.http import require_http_methods
 import json, requests, jwt, datetime, pytz
 
 from codeshipper_app.models.server import Server
-from codeshipper_app.models.project import Project
+from codeshipper_app.models.project import Project, ProjectType
 from . import project_type as pt
 
 @require_http_methods(["POST"])
@@ -24,21 +24,24 @@ def create_project(request):
     server = body_json.get("server")
     type = body_json.get("type")
     config_service = body_json.get("config_service")
+    source_code_path = body_json.get("source_code_path")
     config_path = body_json.get("config_path")
     script_deploy = body_json.get("script_deploy")
     note = body_json.get("note")
 
     if not name or not code or not server or not type or not config_service:
         return HttpResponse(json.dumps({ "state": 0, "message": "Dữ liệu không hợp lệ" }))
-
+    if type:
+        type = ProjectType.objects.filter(id=type).first()
     if server:
-        server = server.Server.query.filter_by(id=server).first()
+        server = Server.objects.filter(id=server).first()
 
     new_project = Project(
         name=name,
         server=server,
         code=code,
         type=type,
+        source_code_path=source_code_path,
         config_path=config_path,
         config_service=config_service,
         script_deploy=script_deploy,
@@ -81,6 +84,8 @@ def update_project(request):
     if not id or not name or not code or not server:
         print ("id or not name or not code or not server", id , name , code , server)
         return HttpResponse(json.dumps({ "state": 0, "message": "Vui lòng cung cấp đầy đủ thông tin" }))
+    
+    type = ProjectType.objects.filter(id=type).first()
     server = Server.objects.filter(id=server).first()
     if not server:
         return HttpResponse(json.dumps({ "state": 0, "message": "Server không hợp lệ" }))

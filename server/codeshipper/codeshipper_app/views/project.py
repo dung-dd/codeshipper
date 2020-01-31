@@ -8,7 +8,11 @@ from django.forms.models import model_to_dict
 from codeshipper_app.models.server import Server
 
 def left_menu_project(request):
-    projects = Project.objects.filter()
+    user = request.user 
+    if not user.id:
+        return redirect("/accounts/login/")
+
+    projects = Project.objects.filter().order_by("-id")
     context = {
         "list_data": projects
     }
@@ -19,6 +23,10 @@ def left_menu_project(request):
 
 
 def project_create(request):
+    user = request.user 
+    if not user.id:
+        return redirect("/accounts/login/")
+
     servers = Server.objects.filter()
     project_type_list = ProjectType.objects.filter()
     context = {
@@ -31,6 +39,10 @@ def project_create(request):
 
 
 def project_detail(request, project_id):
+    user = request.user 
+    if not user.id:
+        return redirect("/accounts/login/")
+
     project = Project.objects.filter(id=project_id)
     if len(project):
         project = project[0]
@@ -42,7 +54,7 @@ def project_detail(request, project_id):
 
     _server_list = [ model_to_dict(_s) for _s in server_list ]
     _project_type_list = [ model_to_dict(_p) for _p in project_type_list ]
-
+    
     context = {
         "item": model_to_dict(project),
         "server_list": _server_list,
@@ -61,7 +73,11 @@ def project_detail(request, project_id):
 """ ============= ============ ============ """
 
 def left_menu_project_type(request):
-    projects_type = ProjectType.objects.filter().order_by("-updated_time", "-id")
+    user = request.user 
+    if not user.id:
+        return redirect("/accounts/login/")
+
+    projects_type = ProjectType.objects.filter().order_by("-id")
     context = {
         "list_data": projects_type
     }
@@ -72,6 +88,10 @@ def left_menu_project_type(request):
 
 
 def left_menu_project_type_create(request):
+    user = request.user 
+    if not user.id:
+        return redirect("/accounts/login/")
+
     context = {}
 
     content_type = "application/html"
@@ -80,6 +100,10 @@ def left_menu_project_type_create(request):
 
 
 def project_type_detail(request, project_type_id):
+    user = request.user 
+    if not user.id:
+        return redirect("/accounts/login/")
+
     project_type = ProjectType.objects.filter(id=project_type_id).first()
     project_type = model_to_dict(project_type) if project_type else {}
     

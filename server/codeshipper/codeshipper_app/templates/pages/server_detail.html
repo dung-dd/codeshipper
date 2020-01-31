@@ -7,7 +7,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
     <title>Server</title>
-    <link href="{% static 'bootstrap.min.css' %}" rel="stylesheet">
+    <!-- <link href="{% static 'bootstrap.min.css' %}" rel="stylesheet"> -->
     <link href="{% static 'style.css' %}" rel="stylesheet">
     <link href="{% static 'animate.css' %}" rel="stylesheet">
 
@@ -26,7 +26,7 @@
     </style>
     <script type="text/javascript" src="{% static 'jquery-3.4.1.min.js' %}"></script>
     {{ cs_data | json_script:"cs_data" }}
-    
+
     <script type="text/javascript">
         notify_template = '<div data-notify="container" class="col-xs-11 col-sm-3 alert alert-{0}" role="alert">' +
             '<button type="button" aria-hidden="true" class="close" data-notify="dismiss">×</button>' +
@@ -62,7 +62,7 @@
             let name = $("#server-address").text().trim();
             let port = $("#server-port").text().trim();
             let secret = $("#server-secret").text().trim();
-            
+
             $.ajax({
                 url,
                 type: "POST",
@@ -136,7 +136,7 @@
                 let url = window.location.origin + (window.location.pathname + "/../delete").replace("//", "/");
                 let return_url = window.location.origin + (window.location.pathname + "/../").replace("//", "/");
                 let id = $("#server_id").val();
-                
+
                 $.ajax({
                     url,
                     type: "POST",
@@ -335,7 +335,7 @@
                         <div class="" style="margin-top: 10px"></div>
 
                         <div class="bgc-white p-20 bd">
-                            
+
                             <div class="mT-30">
                                 <div class="form-group">
                                     <label for="server-address">Địa chỉ Server</label>
@@ -401,7 +401,6 @@
                                     <!-- <span class="" style="width: 10px"></span>
                                     <button id="btn-create" class="btn btn-primary">Tạo</button> -->
                                 </div>
-
                             </div>
                         </div>
                     </div>

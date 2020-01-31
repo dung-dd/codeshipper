@@ -171,9 +171,9 @@
                                             <tr>
                                                 <th></th>
                                                 <th>Name</th>
-                                                <th>Service Type</th>
-                                                <th>Server Name</th>
-                                                <th>Note</th>
+                                                <th>Code</th>
+                                                <th>Service</th>
+                                                <th>Server</th>
                                                 <th>Updated time</th>
                                                 <th>Created time</th>
                                             </tr>
@@ -183,9 +183,9 @@
                                             <tr>
                                                 <th></th>
                                                 <th>Name</th>
-                                                <th>Service Type</th>
-                                                <th>Server Name</th>
-                                                <th>Note</th>
+                                                <th>Code</th>
+                                                <th>Service</th>
+                                                <th>Server</th>
                                                 <th>Updated time</th>
                                                 <th>Created time</th>
                                             </tr>
@@ -199,9 +199,9 @@
                                                             <input type="checkbox" value="{{ item.id }}" data-type="row-table">
                                                         </td>
                                                         <td>{{ item.name }}</td>
-                                                        <td>{{ item.port }}</td>
-                                                        <td>{{ item.secret }}</td>
-                                                        <td>{{ item.note }}</td>
+                                                        <td>{{ item.code }}</td>
+                                                        <td>{{ item.type.name }}</td>
+                                                        <td>{{ item.server.name }}</td>
                                                         <td>{{ item.updated_time }}</td>
                                                         <td>{{ item.created_time }}</td>
                                                     </tr>
@@ -238,8 +238,8 @@
 
         </div>
     </div>
-    <script type="text/javascript" src="{% static "vendor.js" %}"></script>
-    <script type="text/javascript" src="{% static "bundle.js" %}"></script>
+    <script type="text/javascript" src="{% static 'vendor.js' %}"></script>
+    <script type="text/javascript" src="{% static 'bundle.js' %}"></script>
     <script type="text/javascript" src="{% static 'bootstrap.bundle.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'bootstrap-notify.min.js' %}"></script>
 </body>

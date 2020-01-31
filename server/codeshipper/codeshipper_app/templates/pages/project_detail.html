@@ -8,7 +8,7 @@
 	<meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
 	<title>Chi tiết Project</title>
 
-	<link href="{% static 'bootstrap.min.css' %}" rel="stylesheet">
+	<!-- <link href="{% static 'bootstrap.min.css' %}" rel="stylesheet"> -->
 	<link href="{% static 'style.css' %}" rel="stylesheet">
 	<link href="{% static 'animate.css' %}" rel="stylesheet">
 
@@ -104,7 +104,7 @@ notify_template = '<div data-notify="container" class="col-xs-11 col-sm-3 alert 
 			$("#project-note").val(item.note);
 			$('[data-type="field"]').attr("disabled", true);
 		}
-		
+
 		function send_update(notify){
 			let url = window.location.origin + (window.location.pathname + "/../update").replace("//", "/");
 			let id = $("#item_id").val().trim();
@@ -173,7 +173,7 @@ notify_template = '<div data-notify="container" class="col-xs-11 col-sm-3 alert 
 			$("#btn-edit").on("click", ()=>{
 				$('[data-type="field"]').removeAttr("disabled");
 				$(".form-control").css({height: "auto"});
-				
+
 				$("#btn-edit").toggle();
 				$("#btn-save").toggle();
 				$("#btn-cancel-edit").toggle();
@@ -185,7 +185,7 @@ notify_template = '<div data-notify="container" class="col-xs-11 col-sm-3 alert 
 				$("#btn-save").toggle();
 				$("#btn-cancel-edit").toggle();
 				$("#btn-delete").toggle();
-				
+
                 reset_data()
 			});
             $("#btn-save").on("click", ()=>{
@@ -210,7 +210,7 @@ notify_template = '<div data-notify="container" class="col-xs-11 col-sm-3 alert 
 				let url = window.location.origin + (window.location.pathname + "/../delete").replace("//", "/");
 				let return_url = window.location.origin + (window.location.pathname + "/../").replace("//", "/");
 				let id = $("#item_id").val();
-				
+
 				$.ajax({
 					url,
 					type: "POST",
@@ -372,7 +372,7 @@ notify_template = '<div data-notify="container" class="col-xs-11 col-sm-3 alert 
 												{% ifnotequal server.id item.server %}
 													<option class="form-control" value="{{ server.id }}" >{{ server.name }}</option>
 												{% endifnotequal %}
-												
+
 											{% endfor %}
 										{% endif %}
 									</select >
@@ -384,18 +384,23 @@ notify_template = '<div data-notify="container" class="col-xs-11 col-sm-3 alert 
 										<option class="form-control" value="">Project Type</option disabled>
 										{% if project_type_list %}
 											{% for project_type in project_type_list %}
-												{% ifequal server.id item.type %}
+												{% ifequal project_type.id item.type %}
 													<option value="{{ project_type.id }}" selected >{{ project_type.name }}</option>
 												{% endifequal %}
-												{% ifnotequal server.id item.type %}
+												{% ifnotequal project_type.id item.type %}
 													<option value="{{ project_type.id }}" >{{ project_type.name }}</option>
 												{% endifnotequal %}
-	
+
 											{% endfor %}
 										{% endif %}
 									</select >
 								</div>
 
+								<div class="form-group">
+                                    <label for="project-config-path">Source Code Path</label>
+                                    <input disabled data-type="field" class="form-control" id="project-source-code-path" value="{{ item.source_code_path }}">
+                                </div>
+								
 								<div class="form-group">
 									<label for="project-config-path">Config path</label>
 									<input disabled data-type="field" class="form-control" id="project-config-path" value="{{ item.config_path }}">

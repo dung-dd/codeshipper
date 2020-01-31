@@ -12,4 +12,6 @@ SUPPER_SECRET = "erudite"
 SQLALCHEMY_DATABASE_URI = "sqlite:///"+db_file
 MY_FIELD  = "myconfig"
 
+TEMP_DIR = "/tmp/codeshipper"
+
 DEBUG = False

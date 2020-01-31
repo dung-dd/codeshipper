@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
     <title>Tạo mới Project</title>
 
-    <link href="{% static 'bootstrap.min.css' %}" rel="stylesheet">
+    <!-- <link href="{% static 'bootstrap.min.css' %}" rel="stylesheet"> -->
     <link href="{% static 'style.css' %}" rel="stylesheet">
     <link href="{% static 'animate.css' %}" rel="stylesheet">
 
@@ -87,13 +87,14 @@
             let code = $("#project-code").val();
             let server = $("#project-server").val();
             let type = $("#project-type").val();
+            let source_code_path = $("#project-source-code-path").val();
             let config_path = $("#project-config-path").val();
             let config_service = $("#project-config-service").val();
             let script_deploy = $("#project-script-deploy").val();
             let note = $("#project-note").val();
 
             let body = {
-                name, code, server, type, config_path, config_service, script_deploy, note
+                name, code, server, type, source_code_path, config_path, config_service, script_deploy, note
             };
             console.log("body", body);
             $.ajax({
@@ -228,6 +229,11 @@
 
                                 </div>
 
+                                <div class="form-group">
+                                    <label for="project-config-path">Source Code Path</label>
+                                    <input class="form-control" id="project-source-code-path" placeholder="Config Path">
+                                </div>
+                                
                                 <div class="form-group">
                                     <label for="project-config-path">Config path</label>
                                     <input class="form-control" id="project-config-path" placeholder="Config Path">

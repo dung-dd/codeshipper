@@ -8,32 +8,43 @@ from django.contrib.auth.models import User
 import codeshipper_app
 from codeshipper_app.models.server import Server
 from codeshipper_app.models.project import Project
-from codeshipper_app.models.updating import Updating 
+from codeshipper_app.models.update import Update 
 
 def root_path(request):
+    user = request.user 
+    if not user.id:
+        return redirect("/accounts/login/")
+
+    return redirect("/cs/server")
     if (request.get_full_path() == "/"):
-        return redirect("/cs/")
+        return redirect("/cs/server")
 
     total_servers   = Server.objects.filter().count() or 0
     total_projects  = Project.objects.filter().count() or 0
     total_users     = User.objects.filter().count() or 0
-    total_updatings = Updating.objects.filter().count() or 0
+    total_updatings = Update.objects.filter().count() or 0
 
     context = {
         "total_servers": total_servers,
         "total_projects": total_projects,
         "total_users": total_users,
         "total_updatings": total_updatings,
+        "user": request.user
     }
+    # import pudb; pudb.set_trace()
     content_type = "application/html"
     template_name = "pages/index.html"
     return HttpResponse(render(request, template_name, context=context, content_type=content_type))
+
 
 def index(request):
     return root_path(request)
 
 
 def left_menu_users(request):
+    user = request.user 
+    if not user.id:
+        return redirect("/accounts/login/")
     context = {}
     content_type = "application/html"
     template_name = "pages/user.html"

@@ -42,11 +42,12 @@ def get_config_project(request):
         return HttpResponse(json.dumps(json_response))
 
     json_response["data"] = {
+        "source_code_path": project.source_code_path,
         "config_path": project.config_path,
         "config_service": project.config_service,
         "script_deploy": project.script_deploy,
     }
-
+    
     return HttpResponse(json.dumps(json_response))
 
 
@@ -160,6 +161,9 @@ def create_update(request):
     check_again = Update.objects.filter(id=new_update.id)
     if not check_again:
         new_update.save()
+    
+    project.version = new_update.project_version
+    project.save()
 
     try:
         ShipperWorkSpace(new_update.id)

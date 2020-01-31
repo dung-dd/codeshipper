@@ -16,7 +16,7 @@ def left_menu_update(request):
     if not user.id:
         return redirect("/accounts/login/")
 
-    updates = Update.objects.filter().order_by("-id")
+    updates = Update.objects.filter().order_by("-created_time")
     context = {
         "list_data": updates
     }

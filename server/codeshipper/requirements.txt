@@ -3,3 +3,5 @@ requests
 PyJWT==1.6.4
 pytz
 requests
+smtplib
+email

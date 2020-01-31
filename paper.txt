@@ -5,6 +5,33 @@ Các sản phẩm tương tự
 
 	https://vi.wikipedia.org/wiki/Jenkins_(ph%E1%BA%A7n_m%E1%BB%81m)
 
+Phân biệt khái niệm CI (continuous integration) với automated deployment
+	CI: tích hợp liên tục: thực hiện các công việc: build-test-deploy 
+	automated deployment: thực hiện khâu deploy tự động trong quá trình CI 
 
 So sánh với các công cụ khác, và công cụ quản trị mạng ( quản trị network ), mô tả các tính năng 
 
+- Build source code from github, gitlab, svn  (download source code from url, rebuild after commit)
+- Deploy to target server(node)
+- Deploy schedule 
+- Deploy status
+- Notification to team members when build/test is complete
+- Web ssh  
+
+- Đặt vấn đề
+	+ Số lượng website, dịch vụ trên nền internet
+	+ Thời gian cập nhật, nâng cấp,
+
+Các mô hình phát triển phần mềm:
+	Scrum
+	WaterFall, 
+
+Lợi thế khi không có build:
+	- Không cần đến server 
+	- Không cần cài đặt sẵn môi trường, thuận tiện cho việc thường xuyên thay đổi môi trường triển khai.
+	- Có thể gộp Tất cả source code và thư viện, môi trường trong một file.
+	- Phân phối như service  
+
+Hệ thống thực hiện chức năng nâng cấp mã nguồn, cấu hình dịch vụ (website, webapp, service, ...)
+trên các server thông qua một giao diện website. 
+Người sử dụng có thể thực hiện nâng cấp ngay lập tức hoặc lập lịch cho việc nâng cấp.

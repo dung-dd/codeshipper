@@ -6,4 +6,4 @@ from . import project
 from . import server
 from . import config_service
 from . import user
-from . import updating
+from . import update
