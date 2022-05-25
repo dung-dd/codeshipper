@@ -1,6 +1,6 @@
 django==2.2
 requests
-PyJWT==1.6.4
+PyJWT==2.4.0
 pytz
 requests
 smtplib
